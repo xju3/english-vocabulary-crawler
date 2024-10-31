@@ -20,6 +20,7 @@ class OpusManager:
             return
         opus = Opus(code=code)
         self.env.session.add(opus)
+        self.env.session.commit()
         self.env.logger.debug("Added opus:")
 
     def set_opus_downloaded(self, code):

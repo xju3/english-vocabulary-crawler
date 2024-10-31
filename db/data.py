@@ -11,13 +11,13 @@ class Base(DeclarativeBase):
 
 
 class Author(Base):
-    __tablename__ = "Author"
+    __tablename__ = "author"
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String(30))
     fullname: Mapped[Optional[str]]
 
     def __repr__(self) -> str:
-        return f"Author(id={self.id!r}, name={self.name!r}, fullname={self.fullname!r})"
+        return f"author(id={self.id!r}, name={self.name!r}, fullname={self.fullname!r})"
 
 
 class Account(Base):
