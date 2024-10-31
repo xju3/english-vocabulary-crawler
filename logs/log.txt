@@ -1,0 +1,167 @@
+BEGIN (implicit)
+PRAGMA main.table_info("Author")
+[raw sql] ()
+PRAGMA temp.table_info("Author")
+[raw sql] ()
+PRAGMA main.table_info("account")
+[raw sql] ()
+PRAGMA temp.table_info("account")
+[raw sql] ()
+PRAGMA main.table_info("opus")
+[raw sql] ()
+PRAGMA temp.table_info("opus")
+[raw sql] ()
+
+CREATE TABLE "Author" (
+	id INTEGER NOT NULL, 
+	name VARCHAR(30) NOT NULL, 
+	fullname VARCHAR, 
+	PRIMARY KEY (id)
+)
+
+
+[no key 0.00012s] ()
+
+CREATE TABLE account (
+	id INTEGER NOT NULL, 
+	user_name VARCHAR(30) NOT NULL, 
+	PRIMARY KEY (id)
+)
+
+
+[no key 0.00013s] ()
+
+CREATE TABLE opus (
+	id INTEGER NOT NULL, 
+	code VARCHAR NOT NULL, 
+	PRIMARY KEY (id)
+)
+
+
+[no key 0.00012s] ()
+COMMIT
+BEGIN (implicit)
+PRAGMA main.table_info("Author")
+[raw sql] ()
+PRAGMA main.table_info("account")
+[raw sql] ()
+PRAGMA main.table_info("opus")
+[raw sql] ()
+COMMIT
+BEGIN (implicit)
+PRAGMA main.table_info("Author")
+[raw sql] ()
+PRAGMA main.table_info("account")
+[raw sql] ()
+PRAGMA main.table_info("opus")
+[raw sql] ()
+COMMIT
+BEGIN (implicit)
+PRAGMA main.table_info("Author")
+[raw sql] ()
+PRAGMA main.table_info("account")
+[raw sql] ()
+PRAGMA main.table_info("opus")
+[raw sql] ()
+COMMIT
+BEGIN (implicit)
+PRAGMA main.table_info("Author")
+[raw sql] ()
+PRAGMA main.table_info("account")
+[raw sql] ()
+PRAGMA main.table_info("opus")
+[raw sql] ()
+COMMIT
+BEGIN (implicit)
+PRAGMA main.table_info("Author")
+[raw sql] ()
+PRAGMA main.table_info("account")
+[raw sql] ()
+PRAGMA main.table_info("opus")
+[raw sql] ()
+COMMIT
+BEGIN (implicit)
+PRAGMA main.table_info("Author")
+[raw sql] ()
+PRAGMA main.table_info("account")
+[raw sql] ()
+PRAGMA main.table_info("opus")
+[raw sql] ()
+COMMIT
+init global env variables
+init global env variables
+init global env variables
+init global env variables
+init global env variables
+init global env variables
+BEGIN (implicit)
+SELECT opus.id, opus.code 
+FROM opus 
+WHERE opus.code = ?
+[generated in 0.00031s] ('DBYIXTsS-av',)
+INSERT INTO opus (code) VALUES (?)
+[generated in 0.00028s] ('DBYIXTsS-av',)
+SELECT opus.id, opus.code 
+FROM opus 
+WHERE opus.code = ?
+[cached since 0.009117s ago] ('C8mz5MKol7G',)
+INSERT INTO opus (code) VALUES (?)
+[cached since 0.006992s ago] ('C8mz5MKol7G',)
+SELECT opus.id, opus.code 
+FROM opus 
+WHERE opus.code = ?
+[cached since 0.01523s ago] ('DBzfNnxy9Jv',)
+INSERT INTO opus (code) VALUES (?)
+[cached since 0.01326s ago] ('DBzfNnxy9Jv',)
+SELECT opus.id, opus.code 
+FROM opus 
+WHERE opus.code = ?
+[cached since 0.02153s ago] ('DByM3qRyN4-',)
+INSERT INTO opus (code) VALUES (?)
+[cached since 0.01916s ago] ('DByM3qRyN4-',)
+SELECT opus.id, opus.code 
+FROM opus 
+WHERE opus.code = ?
+[cached since 0.02733s ago] ('DBw6cdbyvBh',)
+INSERT INTO opus (code) VALUES (?)
+[cached since 0.02587s ago] ('DBw6cdbyvBh',)
+SELECT opus.id, opus.code 
+FROM opus 
+WHERE opus.code = ?
+[cached since 0.03405s ago] ('DBvoDweSqid',)
+INSERT INTO opus (code) VALUES (?)
+[cached since 0.03148s ago] ('DBvoDweSqid',)
+SELECT opus.id, opus.code 
+FROM opus 
+WHERE opus.code = ?
+[cached since 0.03983s ago] ('DBuVrlWSjnX',)
+INSERT INTO opus (code) VALUES (?)
+[cached since 0.03723s ago] ('DBuVrlWSjnX',)
+SELECT opus.id, opus.code 
+FROM opus 
+WHERE opus.code = ?
+[cached since 0.04538s ago] ('DBtDRSHStVV',)
+INSERT INTO opus (code) VALUES (?)
+[cached since 0.04252s ago] ('DBtDRSHStVV',)
+SELECT opus.id, opus.code 
+FROM opus 
+WHERE opus.code = ?
+[cached since 0.05068s ago] ('DBrw5xvSEfF',)
+INSERT INTO opus (code) VALUES (?)
+[cached since 0.04756s ago] ('DBrw5xvSEfF',)
+SELECT opus.id, opus.code 
+FROM opus 
+WHERE opus.code = ?
+[cached since 0.05573s ago] ('DBqefFAyvha',)
+INSERT INTO opus (code) VALUES (?)
+[cached since 0.05254s ago] ('DBqefFAyvha',)
+SELECT opus.id, opus.code 
+FROM opus 
+WHERE opus.code = ?
+[cached since 0.06069s ago] ('DBpZxtlyMyO',)
+INSERT INTO opus (code) VALUES (?)
+[cached since 0.05772s ago] ('DBpZxtlyMyO',)
+SELECT opus.id, opus.code 
+FROM opus 
+WHERE opus.code = ?
+[cached since 0.06588s ago] ('DBn5tGcS484',)

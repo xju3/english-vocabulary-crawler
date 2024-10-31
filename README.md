@@ -1,2 +1,2 @@
-# 24-insta-rpa
-copy instagram posts to xhs
+# insta-xhs-crawler
+automatically creating reels which contents from instagram
