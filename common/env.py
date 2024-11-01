@@ -1,9 +1,11 @@
 import logging
+import sys
 
+from selenium import webdriver
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 
-from common.cfg_insta import CrawlerConfig
+from common.config import CrawlerConfig
 from db.data import Base
 
 
@@ -27,7 +29,9 @@ class Environment:
         self._session = Session(bind=self._engine)
         logging.basicConfig(filename=self._config.log_file_name, level=logging.INFO, format='%(message)s')
         self._logger = logging.getLogger(__name__)
+        self._logger.addHandler(logging.StreamHandler(sys.stdout))
         self._logger.info('init global env variables')
+        self._driver = webdriver.Firefox(options=self._config.driver_options)
 
     @property
     def engine(self):
@@ -44,3 +48,8 @@ class Environment:
     @property
     def config(self):
         return self._config
+
+    @property
+    def driver(self):
+        return self._driver
+

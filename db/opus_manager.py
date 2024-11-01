@@ -23,6 +23,10 @@ class OpusManager:
         self.env.session.commit()
         self.env.logger.debug("Added opus:")
 
+    def get_publish_items(self):
+        stmp = select(Opus).where(Opus.downloaded != 1)
+        return self.env.session.execute(stmp).fetchmany(2)
+
     def set_opus_downloaded(self, code):
         item = self.get_opus_by_code(code)
         if item is None:

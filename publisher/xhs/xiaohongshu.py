@@ -1,148 +1,132 @@
-import sys
+import json
+import os
+import time
 
+import yt_dlp
+from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
-from selenium.common.exceptions import TimeoutException
 
-import Config
-import Cookie
-import Init
-import Create
+from common.config import get_project_dir
+from common.env import Environment
+from db.opus_manager import OpusManager
+from publisher.xhs.cmd import merge_video_files
+from publisher.xhs.web import XhsWeb
+
+env = Environment()
 
 
-def select_user():
-    while Config.UserList:
-        for i, v in enumerate(Config.UserList):
-            print(f"{i + 1}.{v}", end="\t")
-        phone_number = input("\n请选择用户(输入'n'使用手机号登录)：")
-        if phone_number == 'n':
-            # 手机号登录
-            Config.login_status = True
+def dl_insta_video(code, path):
+    with yt_dlp.YoutubeDL(env.config.yt_options()) as ydl:
+        ydl.download([env.config.insta_opus_url(code)])
+        merge_video_files(path)
+
+
+class XiaoHongShu(object):
+
+    def __init__(self):
+        self.login_status = False
+        self.user_list = []
+        self.cookie_dict = {}
+        self.web = XhsWeb(env)
+        self.curr_user = ''
+        self.load_cookie_users()
+        self.opus_manager = OpusManager()
+
+    def load_cookie_users(self):
+        cookie_file = f'{get_project_dir()}/publisher/xhs/cookies/cookies.json'
+        if os.path.isfile(cookie_file):
+            with open(env.config.cookie_file_name, "r+", encoding="utf-8") as f:
+                content = f.read()
+                if content:
+                    self.cookie_dict.update(json.loads(content))
+        else:
+            env.logger.error("cookie file not exist")
             return
+
+        for k, _ in self.cookie_dict.items():
+            self.user_list.append(k)
+        env.logger.debug("user count: " + str(len(self.user_list)))
+
+    def login_by_cookie(self):
+
+        if self.login_status:
+            return True
+
+        if len(self.cookie_dict) == 0:
+            return False
+
+        if len(self.cookie_dict) == 1:
+            cookie = self.cookie_dict[env.config.xhs_phone]
+            for cookie in json.loads(cookie):
+                env.driver.add_cookie(cookie)
+        else:
+            return False
+
         try:
-            Config.CurrentUser = Config.UserList[int(phone_number) - 1]
-            return
-        except (ValueError, IndexError):
-            print("请输入正确的值！")
+            WebDriverWait(env.driver, 10, 0.2).until(
+                lambda x: x.find_element(By.CSS_SELECTOR, ".name-box")).text
+        except TimeoutException:
+            self.login_status = False
+            env.logger.error("login failed")
+            return False
+        return True
 
+    def login_by_phone(self):
+        self.web.send_sms_code(env.config.xhs_phone)
+        time.sleep(env.config.sleep_short_time)
 
-def login_successful():
-    # 获取昵称
-    name_content = WebDriverWait(Config.Browser, 10, 0.2).until(
-        lambda x: x.find_element(By.CSS_SELECTOR, ".name-box")).text
-    print(f"{name_content},登录成功!")
-    Config.Browser.get("https://creator.xiaohongshu.com/publish/publish")
-    Config.CurrentUser = name_content
-    # 获取Cookie
-    Cookie.get_new_cookie()
-    Cookie.save_cookie()
-
-
-def cookie_login():
-    Cookie.set_cookie()
-    try:
-        WebDriverWait(Config.Browser, 10, 0.2).until(
-            lambda x: x.find_element(By.CSS_SELECTOR, ".name-box")).text
-    except TimeoutException:
-        Config.login_status = True
-        return
-    login_successful()
-
-
-def login():
-    Config.Browser.get("https://creator.xiaohongshu.com/login")
-    if not Config.login_status:
-        cookie_login()
-        return
-    # 访问登陆页面
-    while True:
-        phone = input("请输入手机号：")
-        if len(phone) == 11:
-            break
-        print("手机号码不合法！")
-
-    xpath_phone_input = "/html/body/div[1]/div/div/div/div[2]/div[1]/div[2]/div/div/div/div/div/div[2]/div[1]/div[1]/input"
-    xpath_code_sender = "/html/body/div[1]/div/div/div/div[2]/div[1]/div[2]/div/div/div/div/div/div[2]/div[1]/div[2]/div/div/div[2]"
-
-    xpath_code_input = "/html/body/div[1]/div/div/div/div[2]/div[1]/div[2]/div/div/div/div/div/div[2]/div[1]/div[2]/input"
-    Config.Browser.find_element(By.XPATH, xpath_phone_input).send_keys(phone)
-
-    xpath_login_button = "/html/body/div[1]/div/div/div/div[2]/div[1]/div[2]/div/div/div/div/div/button"
-
-    # 发送验证码
-    Config.Browser.find_element(By.XPATH, xpath_code_sender).click()
-
-    # 获取错误标签
-    # error_span = 'return document.querySelector(".css-1qf7tqh").value'
-    # error = Config.Browser.execute_script(error_span)
-    # if error != "":
-    #     print(error)
-    #     return
-
-    while True:
-        # 输入验证码
-        code = input("请输入验证码：")
-        if len(code) == 6:
-            break
-        print("验证码不合法！")
-
-
-    Config.Browser.find_element(By.XPATH, xpath_code_input).send_keys(code)
-    # 登录
-    Config.Browser.find_element(By.XPATH, xpath_login_button).click()
-    login_successful()
-
-
-def switch_users():
-    print("正在清除Cookie")
-    Config.Browser.delete_all_cookies()
-    select_user()
-    login()
-
-
-def Quit():
-    Cookie.save_cookie()
-    print("Bye!")
-    Config.Browser.quit()
-    sys.exit(0)
-
-
-def select_create():
-    while True:
-        if Config.Browser.current_url != "https://creator.xiaohongshu.com/publish/publish":
-            Config.Browser.get("https://creator.xiaohongshu.com/publish/publish?from=menu")
-        print("1. 视频上传  2.图文上传  3. 切换用户 4.退出")
-        select = input("请选择功能：")
-        match select:
-            case '1':
-                Create.create_video()
-                return
-            case '2':
-                Create.create_image()
-                return
-            case '3':
-                switch_users()
-                return
-            case '4':
-                Quit()
-                return
-            case default:
-                print("请输入合法的数字！")
-
-
-def start():
-    try:
-        # 初始化程序
-        print("正在初始化程序……")
-        Init.init()
-        # 选择用户
-        select_user()
-        # 登录
-        login()
         while True:
-            # 选择功能
-            select_create()
-    except KeyboardInterrupt:
-        print("\nBye!")
-    except Exception as e:
-        print(f"发生了一些错误：\n{e}")
+            code = input("please enter sms code here：")
+            if len(code) == 6:
+                sms_code_valid = False
+                break
+
+        if sms_code_valid:
+            self.web.phone_login(code)
+            time.sleep(env.config.sleep_short_time)
+            return True
+        else:
+            env.logger.error("sms code not valid")
+        return False
+
+    def login(self):
+        self.login_status = self.login_by_cookie()
+        if not self.login_status:
+            self.login_status = self.login_by_phone()
+        if self.login_status:
+            self.login_successfully()
+
+    def login_successfully(self):
+        # 获取昵称
+        self.curr_user = WebDriverWait(env.driver, 10, 0.2).until(
+            lambda x: x.find_element(By.CSS_SELECTOR, ".name-box")).text
+        env.logger(f"{self.curr_user}, login successfully!")
+        cookies = json.dumps(env.driver.get_cookies())
+        self.cookie_dict[self.curr_user] = cookies
+        with open('cookies.json', 'w', encoding='utf-8') as f:
+            f.write(json.dumps(self.cookie_dict))
+        env.logger.debug('cookie saved to file')
+
+    def publish(self):
+        works = self.download()
+        for work in works:
+            self.upload(work.code)
+
+    def upload(self, file):
+        self.web.open(env.config.xhs_publish_url)
+        time.sleep(env.config.sleep_long_time)
+        self.web.upload_video(file)
+
+    def download(self):
+        files = []
+        works = self.opus_manager.get_publish_items()
+        for work in works:
+            code = work.code
+            path = f'download/{code}'
+            dl_insta_video(code, path=path)
+            files.append(f'{path}/{code}/1.mp4')
+        return files
+
+    def run(self):
+        self.login()

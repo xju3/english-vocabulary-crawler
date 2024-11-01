@@ -1,21 +1,30 @@
 import sys
 
 from crawler.insta.vocabulary import Vocabulary
+from publisher.xhs.xiaohongshu import XiaoHongShu
+
+
+def run_insta():
+    insta_vocabulary = Vocabulary()
+    insta_vocabulary.run()
+
+
+def run_xhs():
+    xhs = XiaoHongShu()
+    xhs.run()
 
 
 def main():
     parameters = sys.argv[1:]
 
-    if len(parameters) == 0 or parameters[0] == "1":
-        insta_vocabulary = Vocabulary()
-        insta_vocabulary.run()
+    if parameters is None:
+        run_insta()
 
-    if len(parameters) > 0:
-        if (parameters[0] == "2"):
-            pass
+    if parameters[0] == "1":
+        run_insta()
 
-        if (parameters[0] == "3"):
-            pass
+    if parameters[0] == "2":
+        run_xhs()
 
 
 if __name__ == '__main__':
