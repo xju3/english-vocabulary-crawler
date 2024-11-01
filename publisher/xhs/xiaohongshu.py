@@ -1,5 +1,6 @@
 import json
 import os
+import sys
 import time
 
 import yt_dlp
@@ -9,7 +10,7 @@ from selenium.webdriver.support.wait import WebDriverWait
 
 from common.config import get_project_dir, yt_options
 from common.env import Environment
-from db.opus_manager import OpusManager
+from db.opus_manager import OpusManager, OpusStatus
 from publisher.xhs.cmd import merge_video_files
 from publisher.xhs.web import XhsWeb
 
@@ -56,12 +57,12 @@ class XiaoHongShu(object):
         if len(self.cookie_dict) == 1:
             cookie = self.cookie_dict[env.config.xhs_phone]
             for cookie in json.loads(cookie):
-                env.DRIVER.add_cookie(cookie)
+                env.driver.add_cookie(cookie)
         else:
             return False
 
         try:
-            WebDriverWait(env.DRIVER, 10, 0.2).until(
+            WebDriverWait(env.driver, 10, 0.2).until(
                 lambda x: x.find_element(By.CSS_SELECTOR, ".name-box")).text
         except TimeoutException:
             self.login_status = False
@@ -96,50 +97,31 @@ class XiaoHongShu(object):
 
     def login_successfully(self):
         # 获取昵称
-        self.curr_user = WebDriverWait(env.DRIVER, 10, 0.2).until(
+        self.curr_user = WebDriverWait(env.driver, 10, 0.2).until(
             lambda x: x.find_element(By.CSS_SELECTOR, ".name-box")).text
         env.logger(f"{self.curr_user}, login successfully!")
-        cookies = json.dumps(env.DRIVER.get_cookies())
+        cookies = json.dumps(env.driver.get_cookies())
         self.cookie_dict[self.curr_user] = cookies
         with open('cookies.json', 'w', encoding='utf-8') as f:
             f.write(json.dumps(self.cookie_dict))
         env.logger.debug('cookie saved to file')
 
     def publish(self):
-        works = self.download()
-        for work in works:
-            self.upload(work)
+        items = self.opus_manager.get_publish_items(3)
+        if items is None or len(items) == 0:
+            env.logger.error("no publish items")
+            sys.exit(0)
+        self.login()
+        for item in items:
+            path = f'{env.config.opus_dir}/{item.code}'
+            merge_video_files(path)
+            self.upload(f'{path}/1.mp4')
+
 
     def upload(self, file):
         self.web.open(env.config.xhs_publish_url)
         time.sleep(env.config.sleep_long_time)
         self.web.upload_video(file)
 
-    def download(self):
-        files = []
-        success = 0
-        opus_list = self.opus_manager.get_publish_items()
-        for opus in opus_list:
-            if success == 2:
-                break
-            code = opus.code
-            path = f'download/{code}'
-            try:
-                self.dl_insta_video(code, path=path)
-                success += 1
-                files.append(f'{path}/{code}/1.mp4')
-            except Exception as e:
-                env.logger.error(e)
-        return files
 
-    def dl_insta_video(self, code, path):
-        options = yt_options(f'{path}')
-        with yt_dlp.YoutubeDL(options) as ydl:
-            url = env.config.insta_opus_url(code)
-            ydl.download([url])
-            merge_video_files(path)
-            # self.opus_manager.set_opus_downloaded(code)
 
-    def run(self):
-        # self.login()
-        self.download()

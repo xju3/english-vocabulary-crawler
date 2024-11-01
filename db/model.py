@@ -30,10 +30,11 @@ class Account(Base):
 
 class Opus(Base):
     __tablename__ = "opus"
-    id = Column(Integer, primary_key=True)
-    code = Column(String)
-    author_id = Column(Integer)
-    account_id = Column(Integer)
-    downloaded = Column(Integer)
-    published = Column(Integer)
-    page_index = Column(Integer)
+    id: Mapped[str] = mapped_column(primary_key=True)
+    code : Mapped[str] = mapped_column()
+    author_id : Mapped[int] = mapped_column()
+    account_id : Mapped[int] = mapped_column()
+    downloaded : Mapped[int] = mapped_column()
+    published : Mapped[int] = mapped_column()
+    page_index : Mapped[int] = mapped_column()
+    err :Mapped[int] = mapped_column()

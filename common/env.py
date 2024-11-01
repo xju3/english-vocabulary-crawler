@@ -6,7 +6,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 
 from common.config import CrawlerConfig
-from db.data import Base
+from db.model import Base
 
 
 class SingletonMeta(type):

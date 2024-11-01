@@ -43,6 +43,7 @@ class CrawlerConfig(object):
         self._log_file = cp.get('file', 'log')
         self._cookie_file = cp.get('file', 'cookie')
         self._db_path = cp.get('file', 'db')
+        self._opus_dir = cp.get('file', 'opus_dir')
         # xhs
         self._xhs_phone = cp.get('xhs', 'phone')
         self._xhs_login_url = cp.get('xhs', 'login_url')
@@ -102,6 +103,10 @@ class CrawlerConfig(object):
     @property
     def db_file_name(self):
         return f'sqlite:////{get_project_dir()}/{self._db_path}'
+
+    @property
+    def opus_dir(self):
+        return f'sqlite:////{get_project_dir()}/{self._opus_dir}'
 
     @property
     def driver_options(self):

@@ -12,6 +12,9 @@ def merge_video_files(path):
     video_list_file_path = local_file_path.joinpath("/list.txt")
     if not os.path.isfile(video_list_file_path):
         file_names = next(walk(path), (None, None, []))[2]
+        if len(file_names) == 0:
+            env.logger.error("no video files found")
+            return
         with open(video_list_file_path, "w") as f:
             for line in file_names:
                 f.write(f"{line}\n")
