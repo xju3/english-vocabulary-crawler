@@ -33,11 +33,12 @@ class Account(Base):
 class Opus(Base):
     __tablename__ = "opus"
     id: Mapped[int] = mapped_column(primary_key=True)
-    author_id: Mapped[int] = Mapped[int]
-    account_id: Mapped[int] = Mapped[int]
     code: Mapped[str]
-    downloaded: Mapped[bool] = Mapped[Optional[bool]]
-    uploaded: Mapped[bool] = Mapped[Optional[bool]]
+    author_id: Mapped[int]
+    account_id: Mapped[int]
+    downloaded: Mapped[int]
+    published: Mapped[int]
+    page_index: Mapped[int]
 
     def __repr__(self) -> str:
         return f"Opus(id={self.id!r}, code={self.code!r})"

@@ -16,10 +16,7 @@ from publisher.xhs.web import XhsWeb
 env = Environment()
 
 
-def dl_insta_video(code, path):
-    with yt_dlp.YoutubeDL(env.config.yt_options()) as ydl:
-        ydl.download([env.config.insta_opus_url(code)])
-        merge_video_files(path)
+
 
 
 class XiaoHongShu(object):
@@ -34,7 +31,7 @@ class XiaoHongShu(object):
         self.opus_manager = OpusManager()
 
     def load_cookie_users(self):
-        cookie_file = f'{get_project_dir()}/publisher/xhs/cookies/cookies.json'
+        cookie_file = f'{get_project_dir()}/{env.config.cookie_file_name}'
         if os.path.isfile(cookie_file):
             with open(env.config.cookie_file_name, "r+", encoding="utf-8") as f:
                 content = f.read()
@@ -59,12 +56,12 @@ class XiaoHongShu(object):
         if len(self.cookie_dict) == 1:
             cookie = self.cookie_dict[env.config.xhs_phone]
             for cookie in json.loads(cookie):
-                env.driver.add_cookie(cookie)
+                env.DRIVER.add_cookie(cookie)
         else:
             return False
 
         try:
-            WebDriverWait(env.driver, 10, 0.2).until(
+            WebDriverWait(env.DRIVER, 10, 0.2).until(
                 lambda x: x.find_element(By.CSS_SELECTOR, ".name-box")).text
         except TimeoutException:
             self.login_status = False
@@ -99,10 +96,10 @@ class XiaoHongShu(object):
 
     def login_successfully(self):
         # 获取昵称
-        self.curr_user = WebDriverWait(env.driver, 10, 0.2).until(
+        self.curr_user = WebDriverWait(env.DRIVER, 10, 0.2).until(
             lambda x: x.find_element(By.CSS_SELECTOR, ".name-box")).text
         env.logger(f"{self.curr_user}, login successfully!")
-        cookies = json.dumps(env.driver.get_cookies())
+        cookies = json.dumps(env.DRIVER.get_cookies())
         self.cookie_dict[self.curr_user] = cookies
         with open('cookies.json', 'w', encoding='utf-8') as f:
             f.write(json.dumps(self.cookie_dict))
@@ -124,9 +121,15 @@ class XiaoHongShu(object):
         for work in works:
             code = work.code
             path = f'download/{code}'
-            dl_insta_video(code, path=path)
+            self.dl_insta_video(code, path=path)
             files.append(f'{path}/{code}/1.mp4')
         return files
+
+    def dl_insta_video(self, code, path):
+        with yt_dlp.YoutubeDL(env.config.yt_options()) as ydl:
+            ydl.download([env.config.insta_opus_url(code)])
+            merge_video_files(path)
+            self.opus_manager.set_opus_downloaded(code)
 
     def run(self):
         self.login()

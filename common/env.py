@@ -9,28 +9,51 @@ from common.config import CrawlerConfig
 from db.data import Base
 
 
-def singleton(class_):
-    instances = {}
+class SingletonMeta(type):
+    """
+    The Singleton class can be implemented in different ways in Python. Some
+    possible methods include: base class, decorator, metaclass. We will use the
+    metaclass because it is best suited for this purpose.
+    """
 
-    def getinstance(*args, **kwargs):
-        if class_ not in instances:
-            instances[class_] = class_(*args, **kwargs)
-        return instances[class_]
+    _instances = {}
 
-    return getinstance
+    def __call__(cls, *args, **kwargs):
+        """
+        Possible changes to the value of the `__init__` argument do not affect
+        the returned instance.
+        """
+        if cls not in cls._instances:
+            instance = super().__call__(*args, **kwargs)
+            cls._instances[cls] = instance
+        return cls._instances[cls]
 
 
-@singleton
-class Environment:
-    def __init__(self):
+class Environment(metaclass=SingletonMeta):
+
+    def __init__(self, *args, **kwargs):
         self._config = CrawlerConfig()
         self._engine = create_engine(self._config.db_file_name, echo=True)
         Base.metadata.create_all(self.engine)
         self._session = Session(bind=self._engine)
-        logging.basicConfig(filename=self._config.log_file_name, level=logging.INFO, format='%(message)s')
+
+        ##loging
+        for handler in logging.root.handlers[:]:
+            logging.root.removeHandler(handler)
+        logging.basicConfig(level=logging.WARN,
+                            format='%(asctime)s %(levelname)s %(name)s: %(message)s',
+                            datefmt='%H:%M:%S',
+                            filename=self._config.log_file_name,
+                            filemode='w')
+        logging.getLogger('sqlalchemy.engine.Engine').disabled = True
+        logging.getLogger('common').setLevel(logging.DEBUG)
+        logging.getLogger('crawler').setLevel(logging.DEBUG)
+        logging.getLogger('publisher').setLevel(logging.DEBUG)
+
         self._logger = logging.getLogger(__name__)
         self._logger.addHandler(logging.StreamHandler(sys.stdout))
-        self._logger.info('init global env variables')
+        self._logger.debug('init global env variables')
+        # print(logging.BASIC_FORMAT)
         self._driver = webdriver.Firefox(options=self._config.driver_options)
 
     @property
@@ -52,4 +75,3 @@ class Environment:
     @property
     def driver(self):
         return self._driver
-
