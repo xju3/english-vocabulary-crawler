@@ -12,7 +12,7 @@ sudo apt upgrade
 sudo apt install build-essential
 sudo apt install libssl-dev zlib1g-dev libncurses5-dev libncursesw5-dev libreadline-dev libsqlite3-dev
 sudo apt install libgdbm-dev libdb5.3-dev libbz2-dev libexpat1-dev liblzma-dev libffi-dev
-sudo apt install ffmpeg
+sudo apt install ffmpeg firefox
 ```
 
 ### 1.2.pyenv
@@ -65,5 +65,4 @@ pip install -r requirements
 ###  4.1.download codes used for each post from instagram
 when it is first time to run this app, the program will retrieve all posts of the instagram author. after then, the program only fetch incremental data. all posts will be saved into database and marked as download and published. Now, there is no any media files saved in local disk
 ### 4.2.Publish the post to the destination platform
-Since xhs doesn't support multiple video files in one post, it is necessary to merge downloaded videos into one file, we are using ffmpeg for this merge process. the first time you run it, you need to enter the sms code sent from xhs platform which will be used for subsequent logins. The instagram author has been posted numerous works which saved in our database, so the publishing program only retrieves 2 item at a time. you can use crontab to implement automation.
-
+Since xhs doesn't support multiple video files in one post, it is necessary to merge downloaded videos into one file, we are using ffmpeg for this merge process. the first time you run it, you need to enter the sms code sent from xhs platform which will be used for subsequent logins. The instagram author has been posted numerous works which saved in our database, so the publishing program only retrieves 2 items at a time. you can use crontab to automate the process.

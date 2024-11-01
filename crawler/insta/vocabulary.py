@@ -40,7 +40,7 @@ class Vocabulary:
     def _show_vocabulary_page(self):
         self.driver.get(URL_AUTH_HOME)
         time.sleep(env.config.long_sleep_time)
-        # self._get_vocabulary_codes()
+        self._get_vocabulary_codes()
         self._scroll_to_bottom()
 
     def _get_vocabulary_codes(self):
