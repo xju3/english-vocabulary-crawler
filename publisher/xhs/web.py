@@ -7,7 +7,7 @@ import time
 class XhsWeb:
 
     def __init__(self, env):
-        self.driver = env.DRIVER
+        self.driver = env.driver
         self.config = env.config
 
     def send_sms_code(self, phone):

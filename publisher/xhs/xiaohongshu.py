@@ -7,7 +7,7 @@ from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
 
-from common.config import get_project_dir
+from common.config import get_project_dir, yt_options
 from common.env import Environment
 from db.opus_manager import OpusManager
 from publisher.xhs.cmd import merge_video_files
@@ -108,7 +108,7 @@ class XiaoHongShu(object):
     def publish(self):
         works = self.download()
         for work in works:
-            self.upload(work.code)
+            self.upload(work)
 
     def upload(self, file):
         self.web.open(env.config.xhs_publish_url)
@@ -117,19 +117,29 @@ class XiaoHongShu(object):
 
     def download(self):
         files = []
-        works = self.opus_manager.get_publish_items()
-        for work in works:
-            code = work.code
+        success = 0
+        opus_list = self.opus_manager.get_publish_items()
+        for opus in opus_list:
+            if success == 2:
+                break
+            code = opus.code
             path = f'download/{code}'
-            self.dl_insta_video(code, path=path)
-            files.append(f'{path}/{code}/1.mp4')
+            try:
+                self.dl_insta_video(code, path=path)
+                success += 1
+                files.append(f'{path}/{code}/1.mp4')
+            except Exception as e:
+                env.logger.error(e)
         return files
 
     def dl_insta_video(self, code, path):
-        with yt_dlp.YoutubeDL(env.config.yt_options()) as ydl:
-            ydl.download([env.config.insta_opus_url(code)])
+        options = yt_options(f'{path}')
+        with yt_dlp.YoutubeDL(options) as ydl:
+            url = env.config.insta_opus_url(code)
+            ydl.download([url])
             merge_video_files(path)
-            self.opus_manager.set_opus_downloaded(code)
+            # self.opus_manager.set_opus_downloaded(code)
 
     def run(self):
-        self.login()
+        # self.login()
+        self.download()

@@ -51,17 +51,19 @@ class Vocabulary:
         page_codes = []
 
         for link in all_links:
-            href = link.get_attribute("href")
-            if not href.startswith(URL_POST_PREFIX):
-                continue
-            code = href.replace(URL_POST_PREFIX, '')[:-1]
-            # env.logger.debug(code)
-            if code in self.codes:
-                continue
-            self.codes.append(code)
-            page_codes.append(code)
-
-        env.logger.debug(f"codes: {len(page_codes)} of {len(all_links)}")
+            try:
+                href = link.get_attribute("href")
+                if not href.startswith(URL_POST_PREFIX):
+                    continue
+                code = href.replace(URL_POST_PREFIX, '')[:-1]
+                # env.logger.debug(code)
+                if code in self.codes:
+                    continue
+                self.codes.append(code)
+                page_codes.append(code)
+            except Exception as e:
+                env.logger.error(e)
+        env.logger.debug(f"total: {len(self.codes)}, page: {page_index}, curr: {len(page_codes)}/{len(all_links)}")
         if len(page_codes) > 0:
             self.opus_manager.add_opus(page_codes, page_index)
 
@@ -71,14 +73,15 @@ class Vocabulary:
         scrolldown = self.driver.execute_script(
             "window.scrollTo(0, document.body.scrollHeight);var scrolldown=document.body.scrollHeight;return scrolldown;")
         while True:
-            page_index += 1
-            self._get_vocabulary_codes(page_index)
-            time.sleep(env.config.sleep_medium_time)
-            last_count = scrolldown
-            scrolldown = self.driver.execute_script(
-                "window.scrollTo(0, document.body.scrollHeight);var scrolldown=document.body.scrollHeight;return scrolldown;")
-            if last_count == scrolldown:
-                env.logger.debug(f"reach the end of page: {page_index}")
-                break
-            else:
-                env.logger.debug(f'curr page: {page_index}')
+            try:
+                page_index += 1
+                time.sleep(env.config.sleep_medium_time)
+                self._get_vocabulary_codes(page_index)
+                last_count = scrolldown
+                scrolldown = self.driver.execute_script(
+                    "window.scrollTo(0, document.body.scrollHeight);var scrolldown=document.body.scrollHeight;return scrolldown;")
+                if last_count == scrolldown:
+                    env.logger.debug(f"reach the end of page: {page_index}")
+                    break
+            except Exception as e:
+                env.logger.error(e)

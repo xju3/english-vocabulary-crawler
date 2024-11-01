@@ -41,7 +41,7 @@ class Environment(metaclass=SingletonMeta):
         for handler in logging.root.handlers[:]:
             logging.root.removeHandler(handler)
         logging.basicConfig(level=logging.WARN,
-                            format='%(asctime)s %(levelname)s %(name)s: %(message)s',
+                            format='%(asctime)s %(levelname)s [%(name)s]: %(message)s',
                             datefmt='%H:%M:%S',
                             filename=self._config.log_file_name,
                             filemode='w')
@@ -75,3 +75,11 @@ class Environment(metaclass=SingletonMeta):
     @property
     def driver(self):
         return self._driver
+
+    def yt_options(self, path):
+        return {
+            'outtmpl': f'{path}/%(title)s.%(ext)s',
+            'format': 'bestvideo+bestaudio/best',
+            'merge_output_format': 'mp4'
+        }
+
