@@ -9,12 +9,14 @@ from common.env import Environment
 from db.opus_manager import OpusManager
 
 env = Environment()
+URL_POST_PREFIX = env.config.home_url + "/" + env.config.vocabulary_url + "p/"
+URL_AUTH_HOME = env.config.home_url + "/" + env.config.vocabulary_url
 
 
 class Vocabulary:
 
     def __init__(self):
-        self.URL_PREFIX = env.config.vocabulary_url + "p/"
+
         self.opus_manager = OpusManager()
         self.driver = webdriver.Firefox(options=env.config.driver_options)
         # self.driver.minimize_window()
@@ -36,10 +38,10 @@ class Vocabulary:
         self._show_vocabulary_page()
 
     def _show_vocabulary_page(self):
-        self.driver.get(env.config.vocabulary_url)
+        self.driver.get(URL_AUTH_HOME)
         time.sleep(env.config.long_sleep_time)
-        self._get_vocabulary_codes()
-        # self._scroll_to_bottom()
+        # self._get_vocabulary_codes()
+        self._scroll_to_bottom()
 
     def _get_vocabulary_codes(self):
         time.sleep(env.config.short_sleep_time)
@@ -49,8 +51,8 @@ class Vocabulary:
             return
         for link in all_links:
             href = link.get_attribute("href")
-            if href.startswith(self.URL_PREFIX):
-                code = href.replace(self.URL_PREFIX, '')[:-1]
+            if href.startswith(URL_POST_PREFIX):
+                code = href.replace(URL_POST_PREFIX, '')[:-1]
                 env.logger.debug(code)
                 self.opus_manager.add_opus(code)
 
