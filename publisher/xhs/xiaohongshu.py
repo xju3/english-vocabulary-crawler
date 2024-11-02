@@ -4,9 +4,6 @@ import sys
 import time
 import shutil
 
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.wait import WebDriverWait
-
 from common.env import Environment
 from db.opus_manager import OpusManager, OpusStatus
 from publisher.xhs.cmd import extract_single_frame, list_dir_files
