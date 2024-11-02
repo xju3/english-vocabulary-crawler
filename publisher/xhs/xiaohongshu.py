@@ -19,7 +19,7 @@ env = Environment()
 class XiaoHongShu(object):
 
     def __init__(self):
-        self.login_status = False
+        self.has_cookie = False
         self.user_list = []
         self.cookie_dict = {}
         self.web = XhsWeb(env)
@@ -28,12 +28,13 @@ class XiaoHongShu(object):
         self.opus_manager = OpusManager()
 
     def load_cookie_users(self):
-        cookie_file = f'{get_project_dir()}/{env.config.cookie_file_name}'
+        cookie_file = f'{env.config.cookie_file_name}'
         if os.path.isfile(cookie_file):
             with open(env.config.cookie_file_name, "r+", encoding="utf-8") as f:
                 content = f.read()
                 if content:
                     self.cookie_dict.update(json.loads(content))
+                    self.has_cookie = True
         else:
             env.logger.error("cookie file not exist")
             return
@@ -43,28 +44,21 @@ class XiaoHongShu(object):
         env.logger.debug("user count: " + str(len(self.user_list)))
 
     def login_by_cookie(self):
-
-        if self.login_status:
-            return True
-
-        if len(self.cookie_dict) == 0:
-            return False
-
-        if len(self.cookie_dict) == 1:
-            cookie = self.cookie_dict[env.config.xhs_phone]
-            for cookie in json.loads(cookie):
-                env.driver.add_cookie(cookie)
-        else:
-            return False
-
+        cookie = self.cookie_dict[env.config.xhs_phone]
+        for cookie in json.loads(cookie):
+            env.driver.add_cookie(cookie)
+            expiry = cookie['expiry']
+            now = int(time.time())
+            if now > expiry:
+                self.login_by_phone()
+                return
         try:
             WebDriverWait(env.driver, 10, 0.2).until(
                 lambda x: x.find_element(By.CSS_SELECTOR, ".name-box")).text
-        except TimeoutException:
-            self.login_status = False
-            env.logger.error("login failed")
-            return False
-        return True
+        except Exception as e:
+            env.logger.error(e)
+        self.login_successfully()
+
 
     def login_by_phone(self):
         self.web.send_sms_code(env.config.xhs_phone)
@@ -79,43 +73,45 @@ class XiaoHongShu(object):
         if sms_code_valid:
             self.web.phone_login(code)
             time.sleep(env.config.sleep_short_time)
-            return True
+            self.login_successfully()
         else:
             env.logger.error("sms code not valid")
             sys.exit(0)
 
-    def login(self):
+    def run(self):
+        # open browser
         self.web.open(env.config.xhs_login_url)
-        time.sleep(env.config.sleep_medium_time)
-        self.login_status = self.login_by_cookie()
-        if not self.login_status:
-            self.login_status = self.login_by_phone()
-        if self.login_status:
-            self.login_successfully()
+        time.sleep(env.config.sleep_short_time)
+        # if there are cookies at local, login by cookie*
+        if self.has_cookie:
+            self.login_by_cookie()
+        else:
+            self.login_by_phone()
 
     def login_successfully(self):
         # 获取昵称
-        self.curr_user = WebDriverWait(env.driver, 10, 0.2).until(
-            lambda x: x.find_element(By.CSS_SELECTOR, ".name-box")).text
         env.logger.debug(f"{self.curr_user}, login successfully!")
         cookies = json.dumps(env.driver.get_cookies())
-        self.cookie_dict[self.curr_user] = cookies
-        with open('cookies.json', 'w', encoding='utf-8') as f:
+        self.cookie_dict[env.config.xhs_phone] = cookies
+        with open(env.config.cookie_file_name, 'w', encoding='utf-8') as f:
             f.write(json.dumps(self.cookie_dict))
         env.logger.debug('cookie saved to file')
+        self.web.open(env.config.xhs_publish_url)
+        time.sleep(env.config.sleep_short_time)
+        self.publish()
 
     def publish(self):
+        self.extract_pictures(self.opus_manager.get_download_videos(5))
         items = self.opus_manager.get_publish_items(3)
+        env.logger.error(f"publishing items: {len(items)}")
         if len(items) == 0:
-            env.logger.error("no publish items")
             sys.exit(0)
 
         for item in items:
-            self.web.open(env.config.xhs_publish_url)
             time.sleep(env.config.sleep_medium_time)
             pics = list_dir_files(f'{env.config.opus_dir}/{item.code}', 'jpg')
+            env.logger.error(f"code: {item.code}, pictures: {len(pics)}")
             if len(pics) == 0:
-                env.logger.error("no pictures")
                 continue
             self.web.publish_pictures(pics)
 
@@ -125,25 +121,17 @@ class XiaoHongShu(object):
         time.sleep(env.config.sleep_long_time)
         self.web.publish_video(file)
 
-    def upload_pictures(self, pics):
-        pass
-
-    def run(self):
-        items = self.opus_manager.get_download_videos(5)
-        if len(items) == 0:
-            sys.exit(0)
-        self.extract_pictures(items)
-        self.login()
-        time.sleep(env.config.sleep_medium_time)
-        self.publish()
 
     def extract_pictures(self, items):
         for item in items:
             path = f'{env.config.opus_dir}/{item.code}'
-            files = list_dir_files(path, 'mp4')
-            env.logger.debug(f"{item.code}: {len(files)}")
+            v_files = list_dir_files(path, 'mp4')
+            p_files = list_dir_files(path, 'jpg')
+            if len(p_files) > 0:
+                env.logger.debug(f'{item.code} pictures has been extracted')
+                continue
             err = False
-            for file in files:
+            for file in v_files:
                 file_name = f'{path}/{file}'
                 try:
                     extract_single_frame(file_name, f'{path}/{file.replace('.mp4', '')}.jpg')
