@@ -1,5 +1,6 @@
 import sys
 import time
+from datetime import datetime
 
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
@@ -56,6 +57,13 @@ class XhsWeb:
 
         self.set_values(env.config.xpath_upload_video_button, f"\n".join(full_path_pics))
         time.sleep(self.config.sleep_short_time)
+
+        title = datetime.now().strftime("%Y-%m-%d")
+        self.set_values(env.config.xpath_pic_title_input, title)
+
+        content = "#vocabulary #gre  #tofel #ielts #synonym"
+        self.set_values(env.config.xpath_pic_content_input, content)
+
         self.click(env.config.xpath_pic_publish_button)
         time.sleep(self.config.sleep_long_time)
 

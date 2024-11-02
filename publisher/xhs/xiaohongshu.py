@@ -90,7 +90,7 @@ class XiaoHongShu(object):
         self.publish()
 
     def publish(self):
-        items = self.extract_pictures(self.opus_manager.get_items_for_publishing(5))
+        items = self.extract_pictures(self.opus_manager.get_items_for_publishing(2))
         env.logger.error(f"publishing items: {len(items)}")
         if len(items) == 0:
             sys.exit(0)

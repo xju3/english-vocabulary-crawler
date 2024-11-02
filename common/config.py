@@ -59,6 +59,16 @@ class CrawlerConfig(object):
         self._xpath_upload_pic_button = cp.get('xpath', 'upload_pic_button')
         self._xpath_video_publish_button = cp.get('xpath', 'video_publish_button')
         self._xpath_pic_publish_button = cp.get('xpath', 'pic_publish_button')
+        self._xpath_pic_title_input = cp.get('xpath', 'pic_title_input')
+        self._xpath_pic_content_input = cp.get('xpath', 'pic_content_input')
+
+    @property
+    def xpath_pic_title_input(self):
+        return self._xpath_pic_title_input
+
+    @property
+    def xpath_pic_content_input(self):
+        return self._xpath_pic_content_input
 
     @property
     def xpath_phone_input(self):
