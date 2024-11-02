@@ -57,7 +57,8 @@ class CrawlerConfig(object):
         self._xpath_tab_pics = cp.get('xpath', 'tab_pics')
         self._xpath_upload_video_button  = cp.get('xpath', 'upload_video_button')
         self._xpath_upload_pic_button = cp.get('xpath', 'upload_pic_button')
-        self._xpath_publish_button = cp.get('xpath', 'publish_button')
+        self._xpath_video_publish_button = cp.get('xpath', 'video_publish_button')
+        self._xpath_pic_publish_button = cp.get('xpath', 'pic_publish_button')
 
     @property
     def xpath_phone_input(self):
@@ -92,8 +93,13 @@ class CrawlerConfig(object):
         return self._xpath_upload_pic_button
 
     @property
-    def xpath_publish_button(self):
-        return self._xpath_publish_button
+    def xpath_video_publish_button(self):
+        return self._xpath_video_publish_button
+
+    @property
+    def xpath_pic_publish_button(self):
+        return self._xpath_pic_publish_button
+
 
     @property
     def xhs_phone(self):

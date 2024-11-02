@@ -50,11 +50,7 @@ class XiaoHongShu(object):
             if now > expiry:
                 self.login_by_phone()
                 return
-        try:
-            WebDriverWait(env.driver, 10, 0.2).until(
-                lambda x: x.find_element(By.CSS_SELECTOR, ".name-box")).text
-        except Exception as e:
-            env.logger.error(e)
+        self.curr_user = self.web.get_text('.name-box')
         self.login_successfully()
 
 
@@ -91,8 +87,8 @@ class XiaoHongShu(object):
         with open(env.config.cookie_file_name, 'w', encoding='utf-8') as f:
             f.write(json.dumps(self.cookie_dict))
         env.logger.debug('cookie saved to file')
-        self.web.start_publishing()
-        # self.publish()
+        env.logger.debug(f'{self.curr_user} login successfully')
+        self.publish()
 
     def publish(self):
         self.extract_pictures(self.opus_manager.get_download_videos(5))
@@ -101,13 +97,20 @@ class XiaoHongShu(object):
         if len(items) == 0:
             sys.exit(0)
 
+        self.web.start_publishing()
         for item in items:
-            self.web.start_publishing()
+            self.web.switch_to_publishing_picture()
+            time.sleep(env.config.sleep_short_time)
             pics = list_dir_files(f'{env.config.opus_dir}/{item.code}', 'jpg')
-            env.logger.error(f"code: {item.code}, pictures: {len(pics)}")
+
             if len(pics) == 0:
+                self.opus_manager.set_opus_status(item.code, OpusStatus.err)
                 continue
-            self.web.publish_pictures(pics)
+
+            self.web.publish_pictures(item.code, pics)
+            time.sleep(env.config.sleep_medium_time)
+            self.opus_manager.set_opus_status(item.code, OpusStatus.published)
+        env.driver.quit()
 
 
     def upload_video(self, file):

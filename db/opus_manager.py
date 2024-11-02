@@ -45,7 +45,7 @@ class OpusManager:
     def get_publish_items(self, count):
         if count <= 0:
             return []
-        return self.env.session.query(Opus).filter_by(downloaded=1, extracted=1, err=0).limit(count).all()
+        return self.env.session.query(Opus).filter_by(downloaded=1, extracted=1, published=0, err=0).limit(count).all()
 
     def get_download_videos(self, count):
         if count <= 0:

@@ -37,20 +37,26 @@ class XhsWeb:
         self.open(env.config.xhs_publish_url)
         time.sleep(env.config.sleep_medium_time)
         self.click(env.config.xpath_start_publishing)
-        # self.switch_to_publishing_picture()
 
     def switch_to_publishing_picture(self):
         self.click(env.config.xpath_tab_pics)
 
     def publish_video(self, video_local_path):
-        self.click(env.config.xpath_upload_video_button)
+        self.set_values(env.config.xpath_video_input, video_local_path)
         time.sleep(self.config.sleep_long_time)
+        self.click(env.config.xpath_video_publish_button)
 
-    def publish_pictures(self, pics):
+    def publish_pictures(self, code, pics):
         self.switch_to_publishing_picture()
-        self.set_values(env.config.xpath_upload_video_button, pics)
+        full_path_pics = []
+        for p in pics:
+            file_name = f'{env.config.opus_dir}/{code}/{p}'
+            env.logger.debug(file_name)
+            full_path_pics.append(file_name)
+
+        self.set_values(env.config.xpath_upload_video_button, f"\n".join(full_path_pics))
         time.sleep(self.config.sleep_long_time)
-        self.click(env.config.xpath_publish_button)
+        self.click(env.config.xpath_pic_publish_button)
 
     def click(self, xpath):
         try:
@@ -65,3 +71,11 @@ class XhsWeb:
                 lambda x: x.find_element(By.XPATH, xpath)).send_keys(values)
         except Exception as e:
             env.logger.error(e)
+
+    def get_text(self, css_selector):
+        try:
+           return WebDriverWait(self.driver, env.config.sleep_short_time, 0.2).until(
+                lambda x: x.find_element(By.CSS_SELECTOR, css_selector)).text
+        except Exception as e:
+            env.logger.error(e)
+        return None
