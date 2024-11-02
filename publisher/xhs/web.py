@@ -1,7 +1,12 @@
 import sys
+import time
 
 from selenium.webdriver.common.by import By
-import time
+from selenium.webdriver.support.wait import WebDriverWait
+
+from common.env import Environment
+
+env = Environment()
 
 
 class XhsWeb:
@@ -11,44 +16,52 @@ class XhsWeb:
         self.config = env.config
 
     def send_sms_code(self, phone):
-        xpath_phone_input = "/html/body/div[1]/div/div/div/div[2]/div[1]/div[2]/div/div/div/div/div/div[2]/div[1]/div[1]/input"
-        xpath_code_sender = "/html/body/div[1]/div/div/div/div[2]/div[1]/div[2]/div/div/div/div/div/div[2]/div[1]/div[2]/div/div/div[2]"
-        self.driver.find_element(By.XPATH, xpath_phone_input).send_keys(phone)
-        # click for send sms code
-        self.driver.find_element(By.XPATH, xpath_code_sender).click()
+        self.set_values(env.config.xpath_phone_input, phone)
+        self.click(env.config.xpath_sms_code_sender)
 
     def phone_login(self, sms_code):
         # set sms code
-        xpath_code_input = "/html/body/div[1]/div/div/div/div[2]/div[1]/div[2]/div/div/div/div/div/div[2]/div[1]/div[2]/input"
-        self.driver.find_element(By.XPATH, xpath_code_input).send_keys(sms_code)
+        self.set_values(env.config.xpath_sms_code_input, sms_code)
         # 登录
-        xpath_login_button = "/html/body/div[1]/div/div/div/div[2]/div[1]/div[2]/div/div/div/div/div/button"
-        self.driver.find_element(By.XPATH, xpath_login_button).click()
+        self.click(env.config.xpath_login_button)
 
     def open(self, url):
         self.driver.get(url)
+        time.sleep(env.config.sleep_medium_time)
 
     def quit(self):
         self.driver.quit()
         sys.exit(0)
 
+    def start_publishing(self):
+        self.open(env.config.xhs_publish_url)
+        time.sleep(env.config.sleep_medium_time)
+        self.click(env.config.xpath_start_publishing)
+        # self.switch_to_publishing_picture()
+
+    def switch_to_publishing_picture(self):
+        self.click(env.config.xpath_tab_pics)
+
     def publish_video(self, video_local_path):
-        xpath_upload_video_button = "/html/body/div[1]/div/div[2]/div/div[2]/main/div[3]/div/div/div[1]/div/div/div/div[2]/div[1]/div/input"
-        button_upload = self.driver.find_element(By.XPATH, xpath_upload_video_button)
-        button_upload.send_keys(video_local_path)
+        self.click(env.config.xpath_upload_video_button)
         time.sleep(self.config.sleep_long_time)
-        xpath_publish_button = "/html/body/div[1]/div/div[2]/div/div[2]/main/div[3]/div/div/div[1]/div/div/div/div[2]/div[2]/div/button[1]"
-        self.driver.find_element(By.XPATH, xpath_publish_button).click()
 
     def publish_pictures(self, pics):
-        xpath_tab_pics = "/html/body/div[1]/div/div[2]/div/div[2]/main/div[3]/div/div/div[1]/div/div/div/div[1]/div[2]/span"
-        button_tag = self.driver.find_element(By.XPATH, xpath_tab_pics)
-        button_tag.click()
-        xpath_upload_video_button = "/html/body/div[1]/div/div[2]/div/div[2]/main/div[3]/div/div/div[1]/div/div/div/div[2]/div[1]/div/input"
-        button_upload = self.driver.find_element(By.XPATH, xpath_upload_video_button)
-        button_upload.send_keys(pics)
+        self.switch_to_publishing_picture()
+        self.set_values(env.config.xpath_upload_video_button, pics)
         time.sleep(self.config.sleep_long_time)
-        xpath_publish_button = "/html/body/div[1]/div/div[2]/div/div[2]/main/div[3]/div/div/div[1]/div/div/div/div/div[2]/div/button[1]"
-        self.driver.find_element(By.XPATH, xpath_publish_button).click()
-        time.sleep(self.config.sleep_medium_time)
+        self.click(env.config.xpath_publish_button)
 
+    def click(self, xpath):
+        try:
+            WebDriverWait(self.driver, env.config.sleep_short_time, 0.2).until(
+                lambda x: x.find_element(By.XPATH, xpath)).click()
+        except Exception as e:
+            env.logger.error(e)
+
+    def set_values(self, xpath, values):
+        try:
+            WebDriverWait(self.driver, env.config.sleep_short_time, 0.2).until(
+                lambda x: x.find_element(By.XPATH, xpath)).send_keys(values)
+        except Exception as e:
+            env.logger.error(e)

@@ -3,11 +3,9 @@ import os
 import sys
 import time
 
-from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
 
-from common.config import get_project_dir
 from common.env import Environment
 from db.opus_manager import OpusManager, OpusStatus
 from publisher.xhs.cmd import extract_single_frame, list_dir_files
@@ -62,7 +60,6 @@ class XiaoHongShu(object):
 
     def login_by_phone(self):
         self.web.send_sms_code(env.config.xhs_phone)
-        time.sleep(env.config.sleep_short_time)
 
         while True:
             code = input("please enter sms code here：")
@@ -72,7 +69,6 @@ class XiaoHongShu(object):
 
         if sms_code_valid:
             self.web.phone_login(code)
-            time.sleep(env.config.sleep_short_time)
             self.login_successfully()
         else:
             env.logger.error("sms code not valid")
@@ -81,7 +77,6 @@ class XiaoHongShu(object):
     def run(self):
         # open browser
         self.web.open(env.config.xhs_login_url)
-        time.sleep(env.config.sleep_short_time)
         # if there are cookies at local, login by cookie*
         if self.has_cookie:
             self.login_by_cookie()
@@ -90,15 +85,14 @@ class XiaoHongShu(object):
 
     def login_successfully(self):
         # 获取昵称
-        env.logger.debug(f"{self.curr_user}, login successfully!")
+        time.sleep(env.config.sleep_medium_time)
         cookies = json.dumps(env.driver.get_cookies())
         self.cookie_dict[env.config.xhs_phone] = cookies
         with open(env.config.cookie_file_name, 'w', encoding='utf-8') as f:
             f.write(json.dumps(self.cookie_dict))
         env.logger.debug('cookie saved to file')
-        self.web.open(env.config.xhs_publish_url)
-        time.sleep(env.config.sleep_short_time)
-        self.publish()
+        self.web.start_publishing()
+        # self.publish()
 
     def publish(self):
         self.extract_pictures(self.opus_manager.get_download_videos(5))
@@ -108,7 +102,7 @@ class XiaoHongShu(object):
             sys.exit(0)
 
         for item in items:
-            time.sleep(env.config.sleep_medium_time)
+            self.web.start_publishing()
             pics = list_dir_files(f'{env.config.opus_dir}/{item.code}', 'jpg')
             env.logger.error(f"code: {item.code}, pictures: {len(pics)}")
             if len(pics) == 0:
@@ -118,7 +112,6 @@ class XiaoHongShu(object):
 
     def upload_video(self, file):
         self.web.open(env.config.xhs_publish_url)
-        time.sleep(env.config.sleep_long_time)
         self.web.publish_video(file)
 
 

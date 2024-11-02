@@ -48,6 +48,52 @@ class CrawlerConfig(object):
         self._xhs_phone = cp.get('xhs', 'phone')
         self._xhs_login_url = cp.get('xhs', 'login_url')
         self._xhs_publish_url = cp.get('xhs', 'publish_url')
+        #xpath
+        self._xpath_phone_input = cp.get('xpath', 'phone_input')
+        self._xpath_sms_code_sender = cp.get('xpath', 'sms_code_sender')
+        self._xpath_sms_code_input = cp.get('xpath', 'sms_code_input')
+        self._xpath_login_button = cp.get('xpath', 'login_button')
+        self._xpath_start_publishing = cp.get('xpath', 'start_publishing')
+        self._xpath_tab_pics = cp.get('xpath', 'tab_pics')
+        self._xpath_upload_video_button  = cp.get('xpath', 'upload_video_button')
+        self._xpath_upload_pic_button = cp.get('xpath', 'upload_pic_button')
+        self._xpath_publish_button = cp.get('xpath', 'publish_button')
+
+    @property
+    def xpath_phone_input(self):
+        return self._xpath_phone_input
+
+    @property
+    def xpath_sms_code_sender(self):
+        return self._xpath_sms_code_sender
+
+    @property
+    def xpath_sms_code_input(self):
+        return self._xpath_sms_code_input
+
+    @property
+    def xpath_login_button(self):
+        return self._xpath_login_button
+
+    @property
+    def xpath_start_publishing(self):
+        return self._xpath_start_publishing
+
+    @property
+    def xpath_tab_pics(self):
+        return self._xpath_tab_pics
+
+    @property
+    def xpath_upload_video_button(self):
+        return self._xpath_upload_video_button
+
+    @property
+    def xpath_upload_pic_button(self):
+        return self._xpath_upload_pic_button
+
+    @property
+    def xpath_publish_button(self):
+        return self._xpath_publish_button
 
     @property
     def xhs_phone(self):
