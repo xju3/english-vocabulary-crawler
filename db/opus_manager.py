@@ -37,20 +37,15 @@ class OpusManager:
         if hits > 0:
             self.env.session.commit()
 
-    def get_pending_items(self, count):
+    def get_items_for_downloading(self, count):
         if count <= 0:
             return []
         return self.env.session.query(Opus).filter_by(downloaded=0).limit(count).all()
 
-    def get_publish_items(self, count):
+    def get_items_for_publishing(self, count):
         if count <= 0:
             return []
-        return self.env.session.query(Opus).filter_by(downloaded=1, extracted=1, published=0, err=0).limit(count).all()
-
-    def get_download_videos(self, count):
-        if count <= 0:
-            return []
-        return self.env.session.query(Opus).filter_by(downloaded=1, err=0).limit(count).all()
+        return self.env.session.query(Opus).filter_by(downloaded=1, published=0, err=0).limit(count).all()
 
     def set_opus_status(self, code, status):
         stmt = update(Opus).where(Opus.code == code).values(downloaded=1)

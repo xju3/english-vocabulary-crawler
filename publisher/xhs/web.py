@@ -55,8 +55,9 @@ class XhsWeb:
             full_path_pics.append(file_name)
 
         self.set_values(env.config.xpath_upload_video_button, f"\n".join(full_path_pics))
-        time.sleep(self.config.sleep_long_time)
+        time.sleep(self.config.sleep_short_time)
         self.click(env.config.xpath_pic_publish_button)
+        time.sleep(self.config.sleep_long_time)
 
     def click(self, xpath):
         try:

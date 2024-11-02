@@ -19,7 +19,7 @@ class InstaDownloader:
 
     def download(self):
         env.driver.quit()
-        opus_list = self.opus_manager.get_pending_items(5)
+        opus_list = self.opus_manager.get_items_for_downloading(5)
         for opus in opus_list:
             self.opus_manager.set_opus_status(opus.code, OpusStatus.downloaded)
             code = opus.code

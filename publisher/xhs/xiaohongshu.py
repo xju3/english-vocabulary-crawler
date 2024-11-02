@@ -2,6 +2,7 @@ import json
 import os
 import sys
 import time
+import shutil
 
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
@@ -45,13 +46,10 @@ class XiaoHongShu(object):
         cookie = self.cookie_dict[env.config.xhs_phone]
         for cookie in json.loads(cookie):
             env.driver.add_cookie(cookie)
-            expiry = cookie['expiry']
-            now = int(time.time())
-            if now > expiry:
-                self.login_by_phone()
-                return
+            # expiry = cookie['expiry']
+            # now = int(time.time())
         self.curr_user = self.web.get_text('.name-box')
-        self.login_successfully()
+        self.login_successfully(1)
 
 
     def login_by_phone(self):
@@ -65,7 +63,7 @@ class XiaoHongShu(object):
 
         if sms_code_valid:
             self.web.phone_login(code)
-            self.login_successfully()
+            self.login_successfully(2)
         else:
             env.logger.error("sms code not valid")
             sys.exit(0)
@@ -79,37 +77,39 @@ class XiaoHongShu(object):
         else:
             self.login_by_phone()
 
-    def login_successfully(self):
+    def login_successfully(self, index):
         # 获取昵称
         time.sleep(env.config.sleep_medium_time)
-        cookies = json.dumps(env.driver.get_cookies())
-        self.cookie_dict[env.config.xhs_phone] = cookies
-        with open(env.config.cookie_file_name, 'w', encoding='utf-8') as f:
-            f.write(json.dumps(self.cookie_dict))
-        env.logger.debug('cookie saved to file')
+        if index == 2:
+            cookies = json.dumps(env.driver.get_cookies())
+            self.cookie_dict[env.config.xhs_phone] = cookies
+            with open(env.config.cookie_file_name, 'w', encoding='utf-8') as f:
+                f.write(json.dumps(self.cookie_dict))
+            env.logger.debug('cookie saved to file')
         env.logger.debug(f'{self.curr_user} login successfully')
         self.publish()
 
     def publish(self):
-        self.extract_pictures(self.opus_manager.get_download_videos(5))
-        items = self.opus_manager.get_publish_items(3)
+        items = self.extract_pictures(self.opus_manager.get_items_for_publishing(5))
         env.logger.error(f"publishing items: {len(items)}")
         if len(items) == 0:
             sys.exit(0)
 
         self.web.start_publishing()
+        time.sleep(env.config.sleep_medium_time)
         for item in items:
             self.web.switch_to_publishing_picture()
             time.sleep(env.config.sleep_short_time)
             pics = list_dir_files(f'{env.config.opus_dir}/{item.code}', 'jpg')
 
             if len(pics) == 0:
-                self.opus_manager.set_opus_status(item.code, OpusStatus.err)
+                # self.opus_manager.set_opus_status(item.code, OpusStatus.err)
                 continue
 
             self.web.publish_pictures(item.code, pics)
-            time.sleep(env.config.sleep_medium_time)
             self.opus_manager.set_opus_status(item.code, OpusStatus.published)
+            time.sleep(env.config.sleep_medium_time)
+            shutil.rmtree(f'{env.config.opus_dir}/{item.code}')
         env.driver.quit()
 
 
@@ -138,3 +138,4 @@ class XiaoHongShu(object):
                 self.opus_manager.set_opus_status(item.code, OpusStatus.err)
             else:
                 self.opus_manager.set_opus_status(item.code, OpusStatus.extracted)
+        return items
