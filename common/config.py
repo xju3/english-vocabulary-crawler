@@ -8,8 +8,16 @@ from selenium.webdriver.firefox.options import Options
 
 
 def get_project_dir():
-    current_dir = Path(__file__)
-    return [p for p in current_dir.parents if p.parts[-1] == '24-insta-rpa'][0]
+    current_dir = Path(__file__).resolve().parent
+    while current_dir != current_dir.root:
+        if (current_dir / ".git").exists():  # or any root file like 'requirements.txt'
+            project_root = current_dir
+            break
+        current_dir = current_dir.parent
+    else:
+        raise FileNotFoundError("Project root not found")
+    return current_dir
+    # return os.path.basename(os.path.dirname(os.path.abspath(__file__)))
 
 
 def yt_options(path):
@@ -30,11 +38,11 @@ class CrawlerConfig(object):
 
         cp = configparser.ConfigParser()
         cp.read(config_file)
-        # insta
-        self._username = cp.get('insta', 'user_name')
-        self._password = cp.get('insta', 'password')
-        self._home_url = cp.get('insta', 'host')
-        self._vocabulary_url = cp.get('insta', 'author')
+        # instagram
+        self._username = cp.get('instagram', 'user_name')
+        self._password = cp.get('instagram', 'password')
+        self._home_url = cp.get('instagram', 'host')
+        self._vocabulary_url = cp.get('instagram', 'author')
         # sleep
         self._short_sleep = cp.get('sleep', 'short')
         self._medium_sleep = cp.get('sleep', 'medium')

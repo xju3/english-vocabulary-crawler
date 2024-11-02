@@ -1,5 +1,8 @@
 # This is a sample Python script.
-
+#
+# this function is now working well for vocabulary_sailingo on instagram
+# there are some unexpected risks using for other account
+#
 import time
 
 from selenium.webdriver.common.by import By
@@ -8,11 +11,11 @@ from common.env import Environment
 from db.opus_manager import OpusManager
 
 env = Environment()
-URL_POST_PREFIX = f'{env.config.insta_home_url}/{env.config.insta_vocabulary_url}/p/'
-URL_AUTH_HOME = env.config.insta_home_url + "/" + env.config.insta_vocabulary_url
+URL_AUTHOR_HOME = f'{env.config.insta_home_url}/{env.config.insta_vocabulary_url}'
+URL_POST_PREFIX = f'{URL_AUTHOR_HOME}/p/'
 
 
-class Vocabulary:
+class SaiLingoVoc:
 
     def __init__(self):
         self.opus_manager = OpusManager()
@@ -37,7 +40,7 @@ class Vocabulary:
         self._show_vocabulary_page()
 
     def _show_vocabulary_page(self):
-        self.driver.get(URL_AUTH_HOME)
+        self.driver.get(URL_AUTHOR_HOME)
         time.sleep(env.config.sleep_long_time)
         self._get_vocabulary_codes()
         self._scroll_to_bottom()

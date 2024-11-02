@@ -1,25 +1,28 @@
 import sys
 
-from crawler.insta.dl import InstaDownloader
-from crawler.insta.vocabulary import Vocabulary
-from publisher.xhs.xiaohongshu import XiaoHongShu
+from crawler.instagram.dl import SaiLingoVocDownloader
+from crawler.instagram.sai_lingo_voc import SaiLingoVoc
+from publisher.xhs.publisher import Publisher
 
 
 def main():
     parameters = sys.argv[1:]
 
+    # search the posts and it's link on instagram
     if parameters is None or len(parameters) == 0 or parameters[0] == "1":
-        insta_vocabulary = Vocabulary()
+        insta_vocabulary = SaiLingoVoc()
         insta_vocabulary.run()
         return
 
+    # download each post's resources, videos or pictures
     if parameters[0] == "2":
-        dl = InstaDownloader()
+        dl = SaiLingoVocDownloader()
         dl.download()
         return
 
+    # publish the downloaded contents.
     if parameters[0] == "3":
-        xhs = XiaoHongShu()
+        xhs = Publisher()
         xhs.run()
 
 

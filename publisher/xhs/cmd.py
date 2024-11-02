@@ -1,13 +1,12 @@
 import os
 import subprocess
-from os import walk
-from pathlib import Path
 
 from common.env import Environment
 
 env = Environment()
 
 
+# get dir files by extension
 def list_dir_files(path, ext=None):
     if not os.path.isdir(path):
         return []
@@ -19,8 +18,8 @@ def list_dir_files(path, ext=None):
         return [f for f in os.listdir(path) if
                 f.endswith(ext) and os.path.isfile(os.path.join(path, f))]
 
-
-def extract_single_frame(video_file, output_image_name, time="00:00:05"):
+# extract a picture from a video
+def extract_single_frame(video_file, output_image_name, time="00:00:01"):
     command = [
         "ffmpeg",
         "-ss", time,
@@ -31,7 +30,7 @@ def extract_single_frame(video_file, output_image_name, time="00:00:05"):
     ]
     subprocess.run(command, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
-
+# merge multiple videos to one
 def merge_video_files(path):
     video_list_file_path = path.joinpath("/list.txt")
     if not os.path.isfile(video_list_file_path):

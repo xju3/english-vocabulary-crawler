@@ -12,7 +12,7 @@ def dl_insta_video(code, path):
         url = env.config.insta_opus_url(code)
         ydl.download([url])
 
-class InstaDownloader:
+class SaiLingoVocDownloader:
 
     def __init__(self):
         self.opus_manager = OpusManager()
