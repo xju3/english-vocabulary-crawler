@@ -3,21 +3,17 @@ import os
 import sys
 import time
 
-import yt_dlp
 from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
 
-from common.config import get_project_dir, yt_options
+from common.config import get_project_dir
 from common.env import Environment
 from db.opus_manager import OpusManager, OpusStatus
-from publisher.xhs.cmd import merge_video_files
+from publisher.xhs.cmd import extract_single_frame, list_dir_files
 from publisher.xhs.web import XhsWeb
 
 env = Environment()
-
-
-
 
 
 class XiaoHongShu(object):
@@ -77,7 +73,7 @@ class XiaoHongShu(object):
         while True:
             code = input("please enter sms code here：")
             if len(code) == 6:
-                sms_code_valid = False
+                sms_code_valid = True
                 break
 
         if sms_code_valid:
@@ -86,9 +82,11 @@ class XiaoHongShu(object):
             return True
         else:
             env.logger.error("sms code not valid")
-        return False
+            sys.exit(0)
 
     def login(self):
+        self.web.open(env.config.xhs_login_url)
+        time.sleep(env.config.sleep_medium_time)
         self.login_status = self.login_by_cookie()
         if not self.login_status:
             self.login_status = self.login_by_phone()
@@ -99,7 +97,7 @@ class XiaoHongShu(object):
         # 获取昵称
         self.curr_user = WebDriverWait(env.driver, 10, 0.2).until(
             lambda x: x.find_element(By.CSS_SELECTOR, ".name-box")).text
-        env.logger(f"{self.curr_user}, login successfully!")
+        env.logger.debug(f"{self.curr_user}, login successfully!")
         cookies = json.dumps(env.driver.get_cookies())
         self.cookie_dict[self.curr_user] = cookies
         with open('cookies.json', 'w', encoding='utf-8') as f:
@@ -108,20 +106,51 @@ class XiaoHongShu(object):
 
     def publish(self):
         items = self.opus_manager.get_publish_items(3)
-        if items is None or len(items) == 0:
+        if len(items) == 0:
             env.logger.error("no publish items")
             sys.exit(0)
-        self.login()
+
         for item in items:
-            path = f'{env.config.opus_dir}/{item.code}'
-            merge_video_files(path)
-            self.upload(f'{path}/1.mp4')
+            self.web.open(env.config.xhs_publish_url)
+            time.sleep(env.config.sleep_medium_time)
+            pics = list_dir_files(f'{env.config.opus_dir}/{item.code}', 'jpg')
+            if len(pics) == 0:
+                env.logger.error("no pictures")
+                continue
+            self.web.publish_pictures(pics)
 
 
-    def upload(self, file):
+    def upload_video(self, file):
         self.web.open(env.config.xhs_publish_url)
         time.sleep(env.config.sleep_long_time)
-        self.web.upload_video(file)
+        self.web.publish_video(file)
 
+    def upload_pictures(self, pics):
+        pass
 
+    def run(self):
+        items = self.opus_manager.get_download_videos(5)
+        if len(items) == 0:
+            sys.exit(0)
+        self.extract_pictures(items)
+        self.login()
+        time.sleep(env.config.sleep_medium_time)
+        self.publish()
 
+    def extract_pictures(self, items):
+        for item in items:
+            path = f'{env.config.opus_dir}/{item.code}'
+            files = list_dir_files(path, 'mp4')
+            env.logger.debug(f"{item.code}: {len(files)}")
+            err = False
+            for file in files:
+                file_name = f'{path}/{file}'
+                try:
+                    extract_single_frame(file_name, f'{path}/{file.replace('.mp4', '')}.jpg')
+                except Exception as e:
+                    err = True
+                    env.logger.error(f"{file_name}: {e}")
+            if err:
+                self.opus_manager.set_opus_status(item.code, OpusStatus.err)
+            else:
+                self.opus_manager.set_opus_status(item.code, OpusStatus.extracted)

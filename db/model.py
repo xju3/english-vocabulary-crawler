@@ -37,4 +37,5 @@ class Opus(Base):
     downloaded : Mapped[int] = mapped_column()
     published : Mapped[int] = mapped_column()
     page_index : Mapped[int] = mapped_column()
+    extracted: Mapped[int] = mapped_column()
     err :Mapped[int] = mapped_column()

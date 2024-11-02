@@ -106,7 +106,7 @@ class CrawlerConfig(object):
 
     @property
     def opus_dir(self):
-        return f'sqlite:////{get_project_dir()}/{self._opus_dir}'
+        return f'{get_project_dir()}/{self._opus_dir}'
 
     @property
     def driver_options(self):
@@ -117,6 +117,6 @@ class CrawlerConfig(object):
         options.add_argument('--no-sandbox')
         options.add_argument(f'user-agent=={UserAgent().random}')
         # 无界面模式
-        options.add_argument('--headless')
+        # options.add_argument('--headless')
         return options
 

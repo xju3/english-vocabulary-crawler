@@ -20,7 +20,7 @@ def main():
 
     if parameters[0] == "3":
         xhs = XiaoHongShu()
-        xhs.publish()
+        xhs.run()
 
 
 if __name__ == '__main__':

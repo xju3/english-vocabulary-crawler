@@ -3,6 +3,7 @@ import yt_dlp
 from common.config import yt_options
 from common.env import Environment
 from db.opus_manager import OpusManager, OpusStatus
+from publisher.xhs.cmd import list_dir_files
 
 env = Environment()
 
@@ -18,7 +19,7 @@ class InstaDownloader:
         self.opus_manager = OpusManager()
 
     def download(self):
-        opus_list = self.opus_manager.get_download_items(5)
+        opus_list = self.opus_manager.get_pending_items(5)
         for opus in opus_list:
             self.opus_manager.set_opus_status(opus.code, OpusStatus.downloaded)
             code = opus.code

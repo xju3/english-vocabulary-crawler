@@ -1,44 +1,32 @@
-class SingletonMeta(type):
-    """
-    The Singleton class can be implemented in different ways in Python. Some
-    possible methods include: base class, decorator, metaclass. We will use the
-    metaclass because it is best suited for this purpose.
-    """
+import cv2
+from PIL import Image, ImageEnhance
+# Load the image in grayscale
+image = cv2.imread('/Users/tju/Workspace/24-insta-rpa/tmp/opus/DB0xsAiSSG-/Video 1.jpg', cv2.IMREAD_GRAYSCALE)
 
-    _instances = {}
+_, thresh_image = cv2.threshold(image, 150, 255, cv2.THRESH_BINARY)
 
-    def __call__(cls, *args, **kwargs):
-        """
-        Possible changes to the value of the `__init__` argument do not affect
-        the returned instance.
-        """
-        if cls not in cls._instances:
-            instance = super().__call__(*args, **kwargs)
-            cls._instances[cls] = instance
-        return cls._instances[cls]
+# Convert to Pillow format
+pil_image = Image.fromarray(thresh_image)
 
+# Enhance contrast and sharpness with Pillow
+contrast_enhancer = ImageEnhance.Contrast(pil_image)
+pil_image = contrast_enhancer.enhance(2)
 
-class Singleton(metaclass=SingletonMeta):
+sharpness_enhancer = ImageEnhance.Sharpness(pil_image)
+pil_image = sharpness_enhancer.enhance(2)
 
-    def __init__(self):
-        print('init')
+# Save or display the final image
+pil_image.save('final_enhanced_text_image.jpg')
+pil_image.show()
 
-    def some_business_logic(self):
-        """
-        Finally, any singleton should define some business logic, which can be
-        executed on its instance.
-        """
-
-        # ...
-
-
-if __name__ == "__main__":
-    # The client code.
-
-    s1 = Singleton()
-    s2 = Singleton()
-
-    if id(s1) == id(s2):
-        print("Singleton works, both variables contain the same instance.")
-    else:
-        print("Singleton failed, variables contain different instances.")
+# Denoise the image
+# denoised_image = cv2.fastNlMeansDenoising(image, None, 30, 7, 21)
+#
+# # Apply thresholding to make text more visible
+# _, thresh_image = cv2.threshold(denoised_image, 150, 255, cv2.THRESH_BINARY)
+#
+# # Save or display the processed image
+# cv2.imwrite('denoised_text_image.jpg', thresh_image)
+# cv2.imshow('Denoised Text Image', thresh_image)
+# cv2.waitKey(0)
+# cv2.destroyAllWindows()

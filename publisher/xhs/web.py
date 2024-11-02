@@ -32,11 +32,23 @@ class XhsWeb:
         self.driver.quit()
         sys.exit(0)
 
-    def upload_video(self, video_local_path):
+    def publish_video(self, video_local_path):
         xpath_upload_video_button = "/html/body/div[1]/div/div[2]/div/div[2]/main/div[3]/div/div/div[1]/div/div/div/div[2]/div[1]/div/input"
-
         button_upload = self.driver.find_element(By.XPATH, xpath_upload_video_button)
         button_upload.send_keys(video_local_path)
         time.sleep(self.config.sleep_long_time)
         xpath_publish_button = "/html/body/div[1]/div/div[2]/div/div[2]/main/div[3]/div/div/div[1]/div/div/div/div[2]/div[2]/div/button[1]"
         self.driver.find_element(By.XPATH, xpath_publish_button).click()
+
+    def publish_pictures(self, pics):
+        xpath_tab_pics = "/html/body/div[1]/div/div[2]/div/div[2]/main/div[3]/div/div/div[1]/div/div/div/div[1]/div[2]/span"
+        button_tag = self.driver.find_element(By.XPATH, xpath_tab_pics)
+        button_tag.click()
+        xpath_upload_video_button = "/html/body/div[1]/div/div[2]/div/div[2]/main/div[3]/div/div/div[1]/div/div/div/div[2]/div[1]/div/input"
+        button_upload = self.driver.find_element(By.XPATH, xpath_upload_video_button)
+        button_upload.send_keys(pics)
+        time.sleep(self.config.sleep_long_time)
+        xpath_publish_button = "/html/body/div[1]/div/div[2]/div/div[2]/main/div[3]/div/div/div[1]/div/div/div/div/div[2]/div/button[1]"
+        self.driver.find_element(By.XPATH, xpath_publish_button).click()
+        time.sleep(self.config.sleep_medium_time)
+

@@ -1,4 +1,5 @@
 import logging
+import os
 import sys
 
 from selenium import webdriver
@@ -53,8 +54,7 @@ class Environment(metaclass=SingletonMeta):
         self._logger = logging.getLogger(__name__)
         self._logger.addHandler(logging.StreamHandler(sys.stdout))
         self._logger.debug('init global env variables')
-        # print(logging.BASIC_FORMAT)
-        self._driver = webdriver.Firefox(options=self._config.driver_options)
+        self._driver = webdriver.Firefox(options=self._config.driver_options, service_log_path=os.devnull)
 
     @property
     def engine(self):
