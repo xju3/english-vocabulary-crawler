@@ -24,12 +24,10 @@ class OpusManager:
 
     def add_opus(self, codes, page_index=0):
         hits = 0
-        exists = 0
         for code in codes:
             item = self.get_opus_by_code(code)
             if item is not None:
                 # self.env.logger.info(f'opus already exists: {code}')
-                exists += 1
                 continue
             hits += 1
             opus = Opus(code=code, downloaded=0, published=0, author_id=1, account_id=1, page_index=page_index)

@@ -54,7 +54,7 @@ class WebInteraction:
             self.logger.debug(file_name)
             full_path_pics.append(file_name)
 
-        self.set_values(self.config.xpath_upload_video_button, f"\n".join(full_path_pics))
+        self.set_values(self.config.xpath_upload_video_button, "\n".join(full_path_pics))
         time.sleep(self.config.sleep_short_time)
 
         title = datetime.now().strftime("%Y-%m-%d")

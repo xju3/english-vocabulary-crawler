@@ -56,6 +56,7 @@ class Publisher(object):
 
     def login_by_phone(self):
         self.web_interaction.send_sms_code(env.config.xhs_phone)
+        sms_code_valid = False
         while True:
             code = input("please enter sms code here：")
             if len(code) == 6:
