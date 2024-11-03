@@ -95,23 +95,25 @@ class Publisher(object):
     def publish(self):
         time.sleep(env.config.sleep_short_time)
         items = self.extract_pictures(self.opus_manager.get_items_for_publishing(2))
-        env.logger.debug(f"publishing items: {len(items)}")
         if len(items) == 0:
+            env.logger.error("no data to publish")
             sys.exit(0)
-
+        env.logger.debug(f"{list(map(lambda d: d.code, items)) }")
         self.web_interaction.start_publishing()
-        time.sleep(env.config.sleep_medium_time)
         for item in items:
-            pics = list_dir_files(f'{env.config.opus_dir}/{item.code}', 'jpg')
+            try:
+                pics = list_dir_files(f'{env.config.opus_dir}/{item.code}', 'jpg')
 
-            if len(pics) == 0:
-                # self.opus_manager.set_opus_status(item.code, OpusStatus.err)
-                continue
+                if len(pics) == 0:
+                    env.logger.error("no pics!")
+                    continue
 
-            self.web_interaction.publish_pictures(item.code, pics)
-            self.opus_manager.set_opus_status(item.code, OpusStatus.published)
-            time.sleep(env.config.sleep_medium_time)
-            shutil.rmtree(f'{env.config.opus_dir}/{item.code}')
+                self.web_interaction.publish_pictures(item.code, pics)
+                self.opus_manager.set_opus_status(item.code, OpusStatus.published)
+                time.sleep(env.config.sleep_medium_time)
+                shutil.rmtree(f'{env.config.opus_dir}/{item.code}')
+            except Exception as e:
+                env.logger.error(e)
         env.driver.quit()
 
 

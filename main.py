@@ -17,7 +17,7 @@ def main():
     # download each post's resources, videos or pictures
     if parameters[0] == "2":
         dl = SaiLingoVocDownloader()
-        dl.download()
+        dl.run()
         return
 
     # publish the downloaded contents.

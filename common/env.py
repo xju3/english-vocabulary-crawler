@@ -55,7 +55,7 @@ class Environment(metaclass=SingletonMeta):
         self._logger.addHandler(logging.StreamHandler(sys.stdout))
         self._logger.debug('init global env variables')
         self._driver = webdriver.Firefox(options=self._config.driver_options, service_log_path=os.devnull)
-        self._driver.minimize_window()
+        # self._driver.minimize_window()
 
     @property
     def engine(self):
