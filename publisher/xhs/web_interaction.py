@@ -63,7 +63,7 @@ class WebInteraction:
         words = item.words.split(",")
         prose = item.prose
         for word in words:
-            prose = prose.replace(word, f'**{word}**')
+            prose = prose.replace(word, word.upper())
         line2 = '#散文🤝#泀汇🤝 #GRE 🤝#同义词'
         content = f"{item.words} \n {line2}\n {prose} \n#vocabulary #gre  #tofel #ielts #synonym"
         self.set_values(self.config.xpath_pic_content_input, content)

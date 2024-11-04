@@ -52,7 +52,7 @@ def extract_info(code):
         if len(ans) == 0:
             logger.error(f"no words found: {image}")
             continue
-        word = ans[0]
+        word = " ".join(ans)
         logger.debug(word)
         words.append(word)
 
