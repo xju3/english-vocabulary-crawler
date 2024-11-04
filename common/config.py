@@ -27,8 +27,7 @@ def yt_options(path):
     }
 
 
-def insta_opus_url(code):
-    return f'https://www.instagram.com/p/{code}/'
+
 
 
 class CrawlerConfig(object):
@@ -86,6 +85,9 @@ class CrawlerConfig(object):
     @property
     def xpath_phone_input(self):
         return self._xpath_phone_input
+
+    def insta_opus_url(self,code):
+        return f'https://www.instagram.com/p/{code}/'
 
     @property
     def xpath_sms_code_sender(self):

@@ -70,7 +70,7 @@ class SaiLingoVocDownloader:
 
     def run(self):
         env.driver.quit()
-        failures = self.download(5)
+        failures = self.download(1)
         while failures != 0:
             failures = self.download(failures)
 
@@ -87,9 +87,12 @@ class SaiLingoVocDownloader:
                 if os.path.isdir(path) and len(list_dir_files(path, 'mp4')) > 0:
                     self.opus_manager.set_opus_status(opus.code, OpusStatus.downloaded)
                     words, prose = extract_info(opus.code)
+                    if words is None or prose is None:
+                        self.opus_manager.set_opus_status(opus.code, OpusStatus.no_contents)
+                        continue
                     self.opus_manager.update_extracted_info(opus.code, words, prose)
                 else:
-                    self.opus_manager.set_opus_status(opus.code, OpusStatus.err)
+                    self.opus_manager.set_opus_status(opus.code, OpusStatus.no_resource)
                     failures += 1
             except Exception as e:
                 env.logger.error(e)

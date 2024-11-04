@@ -8,10 +8,11 @@ from db.model import Opus
 
 class OpusStatus(Enum):
     downloaded = 1
-    err = 2
+    no_resource = 2
     extracted = 3
     published = 4
-
+    no_pics = 5
+    no_contents = 6
 
 class OpusManager:
 
@@ -27,7 +28,6 @@ class OpusManager:
         for code in codes:
             item = self.get_opus_by_code(code)
             if item is not None:
-                # self.env.logger.info(f'opus already exists: {code}')
                 continue
             hits += 1
             opus = Opus(code=code, downloaded=0, published=0, author_id=1, account_id=1, page_index=page_index)
@@ -53,8 +53,12 @@ class OpusManager:
     def set_opus_status(self, code, status):
         stmt = update(Opus).where(Opus.code == code).values(downloaded=1)
         match status:
-            case OpusStatus.err:
+            case OpusStatus.no_resource:
                 stmt = update(Opus).where(Opus.code == code).values(err=1)
+            case OpusStatus.no_contents:
+                stmt = update(Opus).where(Opus.code == code).values(err=2)
+            case OpusStatus.no_pics:
+                stmt = update(Opus).where(Opus.code == code).values(err=3)
             case OpusStatus.published:
                 stmt = update(Opus).where(Opus.code == code).values(published=1)
             case OpusStatus.extracted:

@@ -43,7 +43,7 @@ class Environment(metaclass=SingletonMeta):
         ##loging
 
         self._driver = webdriver.Firefox(options=self._config.driver_options, service_log_path=os.devnull)
-        self._driver.minimize_window()
+        # self._driver.minimize_window()
 
     @property
     def engine(self):

@@ -72,7 +72,7 @@ class Publisher(object):
 
     def run(self):
         # open browser
-        self.web_interaction.open(env.config.xhs_login_url)
+        self.web_interaction.open(env.config.xhs_login_url, env.config.xpath_login_button)
         # if there are cookies at local, login by cookie*
         if self.has_cookie:
             self.login_by_cookie()
@@ -89,7 +89,7 @@ class Publisher(object):
                 f.write(json.dumps(self.cookie_dict))
             env.logger.debug('cookie saved to file')
         env.logger.debug(f'{self.curr_user} login successfully')
-        self.web_interaction.open(env.config.xhs_publish_url)
+        self.web_interaction.open(env.config.xhs_publish_url, env.config.xpath_start_publishing)
         self.publish()
 
     def publish(self):
@@ -102,13 +102,20 @@ class Publisher(object):
         self.web_interaction.start_publishing()
         for item in items:
             try:
-                pics = list_dir_files(f'{env.config.opus_dir}/{item.code}', 'jpg')
+                path = f'{env.config.opus_dir}/{item.code}'
+                if not os.path.exists(path):
+                    env.logger.error("directory not exist!")
+                    self.opus_manager.set_opus_status(item.code, OpusStatus.no_pics)
+                    continue
+
+                pics = list_dir_files(path, 'jpg')
                 if len(pics) == 0:
+                    self.opus_manager.set_opus_status(item.code, OpusStatus.no_pics)
                     env.logger.error("no pics!")
                     continue
                 self.web_interaction.publish_pictures(item, pics)
-                self.opus_manager.set_opus_status(item.code, OpusStatus.published)
                 time.sleep(env.config.sleep_medium_time)
+                self.opus_manager.set_opus_status(item.code, OpusStatus.published)
                 shutil.rmtree(f'{env.config.opus_dir}/{item.code}')
             except Exception as e:
                 env.logger.error(e)

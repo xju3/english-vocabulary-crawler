@@ -4,6 +4,7 @@ from datetime import datetime
 
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 
 from common.env import Environment
 
@@ -26,9 +27,20 @@ class WebInteraction:
         # 登录
         self.click(self.config.xpath_login_button)
 
-    def open(self, url, timeout=8):
+    def open(self, url, until_xpath = None):
         self.driver.get(url)
-        time.sleep(timeout)
+
+        if until_xpath is None:
+            time.sleep(3)
+        else:
+            try:
+                # Wait up to 10 seconds for the element to be located and visible
+                 WebDriverWait(self.driver, 10).until(
+                    EC.visibility_of_element_located((By.XPATH, until_xpath))  # Replace with actual element locator
+                )
+                # Now you can safely interact with the element
+            except Exception as e:
+                print("Element not found or other exception:", e)
 
     def quit(self):
         self.driver.quit()
@@ -61,17 +73,18 @@ class WebInteraction:
             title = datetime.now().strftime("%Y-%m-%d")
         self.set_values(self.config.xpath_pic_title_input, title)
         words = item.words.split(",")
-        prose = item.prose
+        line3 = item.prose
         for word in words:
-            prose = prose.replace(word, word.upper())
-        line2 = '#散文🤝#泀汇🤝 #GRE 🤝#同义词'
-        content = f"{item.words} \n {line2}\n {prose} \n#vocabulary #gre  #tofel #ielts #synonym"
+            line3 = line3.replace(word, word.upper())
+        line1 = '#每日英语 #雅思 #高级英文 #词汇书 #专八 #专四 #托福'
+        line2 = "🤝🤝🤝🤝🤝🤝🤝🤝🤝🤝🤝🤝"
+        content = f"{line1} \n {item.words} \n {line2}\n {line3}"
         self.set_values(self.config.xpath_pic_content_input, content)
         self.click(self.config.xpath_pic_publish_button)
 
     # default timeout time is 3s
     def click(self, xpath, timeout=5, poll_frequency=0.5):
-        time.sleep(self.config.sleep_short_time)
+        time.sleep(self.config.sleep_medium_time)
         try:
             WebDriverWait(self.driver, timeout, poll_frequency).until(
                 lambda x: x.find_element(By.XPATH, xpath)).click()
@@ -80,8 +93,8 @@ class WebInteraction:
 
     # default timeout time is 3s
     def set_values(self, xpath, values, timeout=5, poll_frequency=0.5):
+        time.sleep(self.config.sleep_medium_time)
         try:
-            time.sleep(self.config.sleep_short_time)
             WebDriverWait(self.driver, timeout, poll_frequency).until(
                 lambda x: x.find_element(By.XPATH, xpath)).send_keys(values)
         except Exception as e:
