@@ -70,12 +70,6 @@ class CrawlerConfig(object):
         self._xpath_pic_publish_button = cp.get('xpath', 'pic_publish_button')
         self._xpath_pic_title_input = cp.get('xpath', 'pic_title_input')
         self._xpath_pic_content_input = cp.get('xpath', 'pic_content_input')
-        #
-        self._openai_key = cp.get('openai', 'key')
-
-    @property
-    def openai_key(self):
-        return self._openai_key
 
     @property
     def xpath_pic_title_input(self):
