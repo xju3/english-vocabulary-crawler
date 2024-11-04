@@ -9,6 +9,8 @@ from sqlalchemy.orm import Session
 from common.config import CrawlerConfig
 from db.model import Base
 
+from common.logger import  logger
+
 
 class SingletonMeta(type):
     """
@@ -39,23 +41,9 @@ class Environment(metaclass=SingletonMeta):
         self._session = Session(bind=self._engine)
 
         ##loging
-        for handler in logging.root.handlers[:]:
-            logging.root.removeHandler(handler)
-        logging.basicConfig(level=logging.WARN,
-                            format='%(asctime)s %(levelname)s [%(name)s]: %(message)s',
-                            datefmt='%H:%M:%S',
-                            filename=self._config.log_file_name,
-                            filemode='w')
-        logging.getLogger('sqlalchemy.engine.Engine').disabled = True
-        logging.getLogger('common').setLevel(logging.DEBUG)
-        logging.getLogger('crawler').setLevel(logging.DEBUG)
-        logging.getLogger('publisher').setLevel(logging.DEBUG)
 
-        self._logger = logging.getLogger(__name__)
-        self._logger.addHandler(logging.StreamHandler(sys.stdout))
-        self._logger.debug('init global env variables')
         self._driver = webdriver.Firefox(options=self._config.driver_options, service_log_path=os.devnull)
-        # self._driver.minimize_window()
+        self._driver.minimize_window()
 
     @property
     def engine(self):
@@ -67,7 +55,7 @@ class Environment(metaclass=SingletonMeta):
 
     @property
     def logger(self):
-        return self._logger
+        return logger
 
     @property
     def config(self):

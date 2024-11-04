@@ -46,19 +46,26 @@ class WebInteraction:
         time.sleep(self.config.sleep_long_time)
         self.click(self.config.xpath_video_publish_button)
 
-    def publish_pictures(self, code, pics):
+    def publish_pictures(self, item, pics):
         self.switch_to_publishing_picture()
         full_path_pics = []
         for p in pics:
-            file_name = f'{self.config.opus_dir}/{code}/{p}'
+            file_name = f'{self.config.opus_dir}/{item.code}/{p}'
             full_path_pics.append(file_name)
+
 
         self.set_values(self.config.xpath_upload_video_button, "\n".join(full_path_pics))
 
-        title = datetime.now().strftime("%Y-%m-%d")
+        title = f'{item.id}.{self.config.title}'
+        if title is None:
+            title = datetime.now().strftime("%Y-%m-%d")
         self.set_values(self.config.xpath_pic_title_input, title)
-
-        content = "#vocabulary #gre  #tofel #ielts #synonym"
+        words = item.words.split(",")
+        prose = item.prose
+        for word in words:
+            prose = prose.replace(word, f'**{word}**')
+        line2 = '#散文🤝#泀汇🤝 #GRE 🤝#同义词'
+        content = f"{item.words} \n {line2}\n {prose} \n#vocabulary #gre  #tofel #ielts #synonym"
         self.set_values(self.config.xpath_pic_content_input, content)
         self.click(self.config.xpath_pic_publish_button)
 

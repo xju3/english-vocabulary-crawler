@@ -43,7 +43,12 @@ class OpusManager:
     def get_items_for_publishing(self, count):
         if count <= 0:
             return []
-        return self.env.session.query(Opus).filter_by(downloaded=1, published=0, err=0).limit(count).all()
+        return self.env.session.query(Opus).filter_by(extracted = 1, published=0, err=0).limit(count).all()
+
+    def update_extracted_info(self, code, words, prose):
+        stmt = update(Opus).where(Opus.code == code).values(extracted=1, words=f"{','.join(words)}", prose=prose)
+        self.env.session.execute(stmt)
+        self.env.session.commit()
 
     def set_opus_status(self, code, status):
         stmt = update(Opus).where(Opus.code == code).values(downloaded=1)

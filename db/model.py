@@ -32,6 +32,8 @@ class Opus(Base):
     __tablename__ = "opus"
     id: Mapped[str] = mapped_column(primary_key=True)
     code : Mapped[str] = mapped_column()
+    words : Mapped[str] = mapped_column()
+    prose : Mapped[str] = mapped_column()
     author_id : Mapped[int] = mapped_column()
     account_id : Mapped[int] = mapped_column()
     downloaded : Mapped[int] = mapped_column()

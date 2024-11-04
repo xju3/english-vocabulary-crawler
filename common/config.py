@@ -1,6 +1,7 @@
 import configparser
 import os.path
 import sys
+import random
 from pathlib import Path
 
 from fake_useragent import UserAgent
@@ -10,14 +11,12 @@ from selenium.webdriver.firefox.options import Options
 def get_project_dir():
     current_dir = Path(__file__).resolve().parent
     while current_dir != current_dir.root:
-        if (current_dir / ".git").exists():  # or any root file like 'requirements.txt'
-            project_root = current_dir
+        if (current_dir / ".git").exists():
             break
         current_dir = current_dir.parent
     else:
         raise FileNotFoundError("Project root not found")
     return current_dir
-    # return os.path.basename(os.path.dirname(os.path.abspath(__file__)))
 
 
 def yt_options(path):
@@ -30,6 +29,7 @@ def yt_options(path):
 
 class CrawlerConfig(object):
 
+    _titles = []
     def __init__(self):
         config_file = f'{get_project_dir()}/common/config.ini'
         if not os.path.isfile(config_file):
@@ -52,6 +52,7 @@ class CrawlerConfig(object):
         self._cookie_file = cp.get('file', 'cookie')
         self._db_path = cp.get('file', 'db')
         self._opus_dir = cp.get('file', 'opus_dir')
+        self._titles_file = cp.get('file', 'titles')
         # xhs
         self._xhs_phone = cp.get('xhs', 'phone')
         self._xhs_login_url = cp.get('xhs', 'login_url')
@@ -69,6 +70,12 @@ class CrawlerConfig(object):
         self._xpath_pic_publish_button = cp.get('xpath', 'pic_publish_button')
         self._xpath_pic_title_input = cp.get('xpath', 'pic_title_input')
         self._xpath_pic_content_input = cp.get('xpath', 'pic_content_input')
+        #
+        self._openai_key = cp.get('openai', 'key')
+
+    @property
+    def openai_key(self):
+        return self._openai_key
 
     @property
     def xpath_pic_title_input(self):
@@ -165,6 +172,14 @@ class CrawlerConfig(object):
     @property
     def log_file_name(self):
         return f'{get_project_dir()}/{self._log_file}'
+
+    @property
+    def title(self):
+        if len(self._titles)  == 0:
+            file_path =  f'{get_project_dir()}/{self._titles_file}'
+            with open(file_path, 'r') as file:
+                self._titles = [line.strip() for line in file]
+        return random.choice(self._titles)
 
     @property
     def cookie_file_name(self):

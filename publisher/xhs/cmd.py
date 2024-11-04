@@ -18,18 +18,6 @@ def list_dir_files(path, ext=None):
         return [f for f in os.listdir(path) if
                 f.endswith(ext) and os.path.isfile(os.path.join(path, f))]
 
-# extract a picture from a video
-def extract_single_frame(video_file, output_image_name, time="00:00:01"):
-    command = [
-        "ffmpeg",
-        "-ss", time,
-        "-i", video_file,
-        "-frames:v", "1",
-        '-y',
-        output_image_name
-    ]
-    subprocess.run(command, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-
 # merge multiple videos to one
 def merge_video_files(path):
     video_list_file_path = path.joinpath("/list.txt")

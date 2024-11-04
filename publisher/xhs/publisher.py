@@ -6,7 +6,7 @@ import shutil
 
 from common.env import Environment
 from db.opus_manager import OpusManager, OpusStatus
-from publisher.xhs.cmd import extract_single_frame, list_dir_files
+from publisher.xhs.cmd import list_dir_files
 from publisher.xhs.web_interaction import WebInteraction
 
 env = Environment()
@@ -94,7 +94,7 @@ class Publisher(object):
 
     def publish(self):
         time.sleep(env.config.sleep_short_time)
-        items = self.extract_pictures(self.opus_manager.get_items_for_publishing(2))
+        items = self.opus_manager.get_items_for_publishing(1)
         if len(items) == 0:
             env.logger.error("no data to publish")
             sys.exit(0)
@@ -103,12 +103,10 @@ class Publisher(object):
         for item in items:
             try:
                 pics = list_dir_files(f'{env.config.opus_dir}/{item.code}', 'jpg')
-
                 if len(pics) == 0:
                     env.logger.error("no pics!")
                     continue
-
-                self.web_interaction.publish_pictures(item.code, pics)
+                self.web_interaction.publish_pictures(item, pics)
                 self.opus_manager.set_opus_status(item.code, OpusStatus.published)
                 time.sleep(env.config.sleep_medium_time)
                 shutil.rmtree(f'{env.config.opus_dir}/{item.code}')
@@ -120,26 +118,3 @@ class Publisher(object):
     def upload_video(self, file):
         self.web_interaction.open(env.config.xhs_publish_url)
         self.web_interaction.publish_video(file)
-
-
-    def extract_pictures(self, items):
-        for item in items:
-            path = f'{env.config.opus_dir}/{item.code}'
-            v_files = list_dir_files(path, 'mp4')
-            p_files = list_dir_files(path, 'jpg')
-            if len(p_files) > 0:
-                env.logger.debug(f'{item.code} pictures has been extracted')
-                continue
-            err = False
-            for file in v_files:
-                file_name = f'{path}/{file}'
-                try:
-                    extract_single_frame(file_name, f'{path}/{file.replace('.mp4', '')}.jpg')
-                except Exception as e:
-                    err = True
-                    env.logger.error(f"{file_name}: {e}")
-            if err:
-                self.opus_manager.set_opus_status(item.code, OpusStatus.err)
-            else:
-                self.opus_manager.set_opus_status(item.code, OpusStatus.extracted)
-        return items
