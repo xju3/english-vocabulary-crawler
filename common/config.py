@@ -27,6 +27,10 @@ def yt_options(path):
     }
 
 
+def insta_opus_url(code):
+    return f'https://www.instagram.com/p/{code}/'
+
+
 class CrawlerConfig(object):
 
     _titles = []
@@ -143,9 +147,6 @@ class CrawlerConfig(object):
     @property
     def insta_home_url(self):
         return self._home_url
-
-    def insta_opus_url(self, code):
-        return f'https://www.instagram.com/p/{code}/'
 
     @property
     def insta_vocabulary_url(self):
