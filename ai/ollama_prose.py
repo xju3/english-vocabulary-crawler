@@ -5,7 +5,7 @@ from common.logger import logger
 
 def ollama_compose_prose(words):
     ollama_url = "http://localhost:3000/ollama/api/generate"
-    prompt = f"Generate a easy prose with fewer than 800 characters, incorporating the words: {",".join(words)}."
+    prompt = f"Generate a easy prose with fewer than 800 characters, incorporating these words: {",".join(words)}."
     logger.debug(prompt)
 
     OLLAMA_API_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImM4MWRlNDM3LTcwYWMtNGQ5YS1iOTMxLTIwOWRjYjYzODY5OSJ9.tRCG3Nq5mnV00S55uXaOffLeAFqZ_I3KhS7suyav3m0'

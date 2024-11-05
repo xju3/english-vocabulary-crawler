@@ -41,8 +41,8 @@ class Environment(metaclass=SingletonMeta):
         self._session = Session(bind=self._engine)
 
         ##loging
-
-        self._driver = webdriver.Firefox(options=self._config.driver_options, service_log_path=os.devnull)
+        self._logger = logger
+        self._driver = webdriver.Firefox(options=self._config.driver_options)
         # self._driver.minimize_window()
 
     @property
@@ -55,7 +55,7 @@ class Environment(metaclass=SingletonMeta):
 
     @property
     def logger(self):
-        return logger
+        return self._logger
 
     @property
     def config(self):

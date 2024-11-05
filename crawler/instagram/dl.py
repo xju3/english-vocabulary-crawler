@@ -29,8 +29,8 @@ def extract_info(code):
         return ans
 
     video_files = list_dir_files(path, 'mp4')
-    logger.debug(video_files)
-    logger.debug(len(video_files))
+    # logger.debug(video_files)
+    # logger.debug(len(video_files))
 
     if len(video_files) == 0:
         return ans
@@ -70,7 +70,7 @@ class SaiLingoVocDownloader:
 
     def run(self):
         env.driver.quit()
-        failures = self.download(1)
+        failures = self.download(10)
         while failures != 0:
             failures = self.download(failures)
 
