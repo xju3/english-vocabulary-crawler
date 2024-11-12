@@ -68,17 +68,23 @@ class WebInteraction:
 
         self.set_values(self.config.xpath_upload_video_button, "\n".join(full_path_pics))
 
-        title = f'{item.id}.{self.config.title}'
-        if title is None:
-            title = datetime.now().strftime("%Y-%m-%d")
-        self.set_values(self.config.xpath_pic_title_input, title)
         words = item.words.split(",")
-        line3 = item.prose
+        title = datetime.now().strftime("%Y-%m-%d")
+        prose = item.prose
+        size = 0
+        total = 0
         for word in words:
-            line3 = line3.replace(word, word.upper())
-        line1 = '#每日英语 #雅思 #高级英文 #词汇书 #专八 #专四 #托福'
+            total += 1
+            prose = prose.replace(word, word.upper())
+            if len(word) > size:
+                title = word
+                size = len(word)
+
+        emoji = self.config.title
+        self.set_values(self.config.xpath_pic_title_input, f'{item.id}.每日单词({total}):{emoji}{title.upper()}{emoji}')
+        line1 = '#英语 #雅思 #高级英文 #词汇书 #专八 #专四 #托福'
         line2 = "🤝🤝🤝🤝🤝🤝🤝🤝🤝🤝🤝🤝"
-        content = f"{line1} \n {item.words} \n {line2}\n {line3}"
+        content = f"{line1} \n {line2}\n {prose}"
         self.set_values(self.config.xpath_pic_content_input, content)
         self.click(self.config.xpath_pic_publish_button)
 

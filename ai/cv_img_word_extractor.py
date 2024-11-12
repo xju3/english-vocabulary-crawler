@@ -9,6 +9,34 @@ from common.logger import logger
 # Path to the Tesseract executable (modify this path if necessary)
 pytesseract.pytesseract.tesseract_cmd = '/opt/homebrew/bin/tesseract'
 
+def mp4_to_mov(video_file, output_video_name):
+    command = [
+        "ffmpeg",
+        "-i", video_file,
+        "-f", "mov",
+        '-y', output_video_name
+    ]
+    print(command)
+    subprocess.run(command, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+
+def merge_videos(list_file_name, output_video_name):
+    command = [
+        "ffmpeg",
+        "-safe", 0,
+        "-f", "concat",
+        "-i", list_file_name,
+        "-c", "copy",
+        '-y', output_video_name
+    ]
+    print(command)
+    subprocess.run(command, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+
+def save_list_to_file(path, list, file_name):
+    with open(file_name, 'w') as file:
+        for item in list:
+            video_file = f"file '{path}/{item}'\n"
+            file.write(video_file)
+
 def extract_single_frame(video_file, output_image_name, time="00:00:01"):
     command = [
         "ffmpeg",

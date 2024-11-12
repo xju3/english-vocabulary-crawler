@@ -60,7 +60,7 @@ def extract_info(code):
     if len(words) > 0:
         prose = ollama_compose_prose(words)
 
-    return words ,prose
+    return words, prose
 
 
 class SaiLingoVocDownloader:
