@@ -81,10 +81,10 @@ class WebInteraction:
                 size = len(word)
 
         emoji = self.config.title
-        self.set_values(self.config.xpath_pic_title_input, f'{item.id}.每日单词({total}):{emoji}{title.upper()}{emoji}')
-        line1 = '#英语 #雅思 #高级英文 #词汇书 #专八 #专四 #托福'
-        line2 = "🤝🤝🤝🤝🤝🤝🤝🤝🤝🤝🤝🤝"
-        content = f"{line1} \n {line2}\n {prose}"
+        self.set_values(self.config.xpath_pic_title_input, f'{item.id}.{emoji}{title.upper()}{emoji}')
+        line1 = '#英语 #雅思 #每日 #单词 #词汇书 #专八 #专四 #托福'
+        titleEmoji = self.config.title
+        content = f"{line1} \n {titleEmoji* 16}\n {prose}"
         self.set_values(self.config.xpath_pic_content_input, content)
         self.click(self.config.xpath_pic_publish_button)
 

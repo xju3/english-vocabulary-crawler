@@ -30,7 +30,7 @@ def yt_options(path):
 
 class CrawlerConfig(object):
 
-    _titles = []
+    _emojis = []
     def __init__(self):
         config_file = f'{get_project_dir()}/common/config.ini'
         if not os.path.isfile(config_file):
@@ -40,8 +40,8 @@ class CrawlerConfig(object):
         cp = configparser.ConfigParser()
         cp.read(config_file)
         # instagram
-        self._username = cp.get('instagram', 'user_name')
-        self._password = cp.get('instagram', 'password')
+        self._username = os.getenv('INSTAGAMM_USERNAME')
+        self._password = os.getenv('INSTAGRAM_PASSWORD')
         self._home_url = cp.get('instagram', 'host')
         self._vocabulary_url = cp.get('instagram', 'author')
         # sleep
@@ -53,9 +53,8 @@ class CrawlerConfig(object):
         self._cookie_file = cp.get('file', 'cookie')
         self._db_path = cp.get('file', 'db')
         self._opus_dir = cp.get('file', 'opus_dir')
-        self._titles_file = cp.get('file', 'titles')
-        # xhs
-        self._xhs_phone = cp.get('xhs', 'phone')
+        self._emoji_file = cp.get('file', 'emoji')
+        self._xhs_phone = os.getenv('XHS_PHONE')
         self._xhs_login_url = cp.get('xhs', 'login_url')
         self._xhs_publish_url = cp.get('xhs', 'publish_url')
         #xpath
@@ -170,11 +169,11 @@ class CrawlerConfig(object):
 
     @property
     def title(self):
-        if len(self._titles)  == 0:
-            file_path =  f'{get_project_dir()}/{self._titles_file}'
+        if len(self._emojis)  == 0:
+            file_path =  f'{get_project_dir()}/{self._emoji_file}'
             with open(file_path, 'r') as file:
-                self._titles = [line.strip() for line in file]
-        return random.choice(self._titles)
+                self._emojis = [line.strip() for line in file]
+        return random.choice(self._emojis)
 
     @property
     def cookie_file_name(self):
