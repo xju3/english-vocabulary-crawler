@@ -32,6 +32,7 @@ def ollama_compose_prose(words, repeat=5):
                 article = data['response']
                 article = article.replace("{", "").replace("}", "").replace(":", "").replace("\n", "")
                 if len(article) < 100 and repeat > 0:
+                    print(f'article: {len(article)}')
                     time.sleep(10)
                     repeat -= 1
                     ollama_compose_prose(words, repeat)

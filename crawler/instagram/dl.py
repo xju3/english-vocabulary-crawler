@@ -94,4 +94,3 @@ class SaiLingoVocDownloader:
             except Exception as e:
                 self.logger.error(e)
         return failures
-
