@@ -1,15 +1,10 @@
-import logging
-import os
-import sys
-
 from selenium import webdriver
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 
 from common.config import CrawlerConfig
+from common.logger import logger
 from db.model import Base
-
-from common.logger import  logger
 
 
 class SingletonMeta(type):
@@ -34,7 +29,7 @@ class SingletonMeta(type):
 
 class Environment(metaclass=SingletonMeta):
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, app=0, *args, **kwargs):
         self._config = CrawlerConfig()
         self._engine = create_engine(self._config.db_file_name, echo=True)
         Base.metadata.create_all(self.engine)
@@ -42,7 +37,8 @@ class Environment(metaclass=SingletonMeta):
 
         ##loging
         self._logger = logger
-        self._driver = webdriver.Firefox(options=self._config.driver_options)
+        if app == 0:
+            self._driver = webdriver.Firefox(options=self._config.driver_options)
         # self._driver.minimize_window()
 
     @property
@@ -71,4 +67,3 @@ class Environment(metaclass=SingletonMeta):
             'format': 'bestvideo+bestaudio/best',
             'merge_output_format': 'mp4'
         }
-

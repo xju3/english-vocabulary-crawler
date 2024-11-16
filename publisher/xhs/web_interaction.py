@@ -3,16 +3,13 @@ import time
 from datetime import datetime
 
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-
-from common.env import Environment
+from selenium.webdriver.support.wait import WebDriverWait
 
 
 class WebInteraction:
 
-    def __init__(self):
-        env = Environment()
+    def __init__(self, env):
         self.driver = env.driver
         self.config = env.config
         self.logger = env.logger
@@ -27,7 +24,7 @@ class WebInteraction:
         # 登录
         self.click(self.config.xpath_login_button)
 
-    def open(self, url, until_xpath = None):
+    def open(self, url, until_xpath=None):
         self.driver.get(url)
 
         if until_xpath is None:
@@ -35,10 +32,10 @@ class WebInteraction:
         else:
             try:
                 # Wait up to 10 seconds for the element to be located and visible
-                 WebDriverWait(self.driver, 10).until(
+                WebDriverWait(self.driver, 10).until(
                     EC.visibility_of_element_located((By.XPATH, until_xpath))  # Replace with actual element locator
                 )
-                # Now you can safely interact with the element
+            # Now you can safely interact with the element
             except Exception as e:
                 print("Element not found or other exception:", e)
 
@@ -65,7 +62,6 @@ class WebInteraction:
             file_name = f'{self.config.opus_dir}/{item.code}/{p}'
             full_path_pics.append(file_name)
 
-
         self.set_values(self.config.xpath_upload_video_button, "\n".join(full_path_pics))
 
         words = item.words.split(",")
@@ -84,7 +80,7 @@ class WebInteraction:
         self.set_values(self.config.xpath_pic_title_input, f'{item.id}.{emoji}{title.upper()}{emoji}')
         line1 = '#英语 #雅思 #每日 #单词 #词汇书 #专八 #专四 #托福'
         titleEmoji = self.config.title
-        content = f"{line1} \n {titleEmoji* 16}\n {prose}"
+        content = f"{line1} \n {titleEmoji * 16}\n {prose}"
         self.set_values(self.config.xpath_pic_content_input, content)
         self.click(self.config.xpath_pic_publish_button)
 

@@ -9,19 +9,18 @@ from common.env import Environment
 from db.opus_manager import OpusManager, OpusStatus
 from publisher.xhs.cmd import list_dir_files
 
-env = Environment()
 
 from common.logger import logger
 
 
-def dl_insta_video(code, path):
+def dl_insta_video(env, code, path):
     options = yt_options(f'{path}')
     with yt_dlp.YoutubeDL(options) as ydl:
         url = env.config.insta_opus_url(code)
         return ydl.download([url])
 
 
-def extract_info(code):
+def extract_info(env, code):
 
     ans = None, None
     path = f'{env.config.opus_dir}/{code}'
@@ -29,9 +28,6 @@ def extract_info(code):
         return ans
 
     video_files = list_dir_files(path, 'mp4')
-    # logger.debug(video_files)
-    # logger.debug(len(video_files))
-
     if len(video_files) == 0:
         return ans
 
@@ -66,10 +62,10 @@ def extract_info(code):
 class SaiLingoVocDownloader:
 
     def __init__(self):
+        self.env = Environment(app=1)
         self.opus_manager = OpusManager()
 
     def run(self):
-        env.driver.quit()
         failures = self.download(10)
         while failures != 0:
             failures = self.download(failures)
@@ -80,13 +76,13 @@ class SaiLingoVocDownloader:
         for opus in items:
             self.opus_manager.set_opus_status(opus.code, OpusStatus.downloaded)
             code = opus.code
-            path = f'{env.config.opus_dir}/{code}'
+            path = f'{self.env.config.opus_dir}/{code}'
             try:
-                dl_insta_video(code, path=path)
-                path = f'{env.config.opus_dir}/{opus.code}'
+                dl_insta_video(self.env, code, path=path)
+                path = f'{self.env.config.opus_dir}/{opus.code}'
                 if os.path.isdir(path) and len(list_dir_files(path, 'mp4')) > 0:
                     self.opus_manager.set_opus_status(opus.code, OpusStatus.downloaded)
-                    words, prose = extract_info(opus.code)
+                    words, prose = extract_info(self.env, opus.code)
                     if words is None or prose is None:
                         self.opus_manager.set_opus_status(opus.code, OpusStatus.no_contents)
                         continue
@@ -95,6 +91,6 @@ class SaiLingoVocDownloader:
                     self.opus_manager.set_opus_status(opus.code, OpusStatus.no_resource)
                     failures += 1
             except Exception as e:
-                env.logger.error(e)
+                self.env.logger.error(e)
         return failures
 
