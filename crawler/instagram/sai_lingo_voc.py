@@ -6,6 +6,7 @@
 import time
 
 from selenium.webdriver.common.by import By
+from selenium import webdriver
 
 from common.env import Environment
 from db.opus_manager import OpusManager
@@ -16,7 +17,7 @@ class SaiLingoVoc:
     def __init__(self):
         self.opus_manager = OpusManager()
         self.env = Environment(app=0)
-        self.driver = self.env.driver
+        self.driver = webdriver.Firefox(options=self.env.config.driver_options)
         self.codes = []
         self.URL_AUTHOR_HOME = f'{self.env.config.insta_home_url}/{self.env.config.insta_vocabulary_url}'
         self.URL_POST_PREFIX = f'{self.URL_AUTHOR_HOME}/p/'

@@ -9,9 +9,9 @@ from selenium.webdriver.support.wait import WebDriverWait
 
 class WebInteraction:
 
-    def __init__(self, env):
-        self.driver = env.driver
+    def __init__(self, env, driver):
         self.config = env.config
+        self.driver = driver
         self.logger = env.logger
 
     def send_sms_code(self, phone):
@@ -59,7 +59,7 @@ class WebInteraction:
         self.switch_to_publishing_picture()
         full_path_pics = []
         for p in pics:
-            file_name = f'{self.config.opus_dir}/{item.code}/{p}'
+            file_name = f'{self.config.opus_dir}/{item.id}.{item.code}/{p}'
             full_path_pics.append(file_name)
 
         self.set_values(self.config.xpath_upload_video_button, "\n".join(full_path_pics))
@@ -71,14 +71,17 @@ class WebInteraction:
         total = 0
         for word in words:
             total += 1
-            prose = prose.replace(word, word.upper())
+            prose = prose.replace(word, f'_____({total})_____')
             if len(word) > size:
                 title = word
                 size = len(word)
 
         emoji = self.config.title
-        self.set_values(self.config.xpath_pic_title_input, f'{item.id}.{emoji}{title.upper()}{emoji}')
-        line1 = '#英语 #雅思 #每日 #单词 #词汇书 #专八 #专四 #托福'
+        if len(prose) > 200:
+            self.set_values(self.config.xpath_pic_title_input, f'{item.id}.填空->{emoji}{title.upper()}{emoji}')
+        else:
+            self.set_values(self.config.xpath_pic_title_input, f'{item.id}.{emoji}{title.upper()}{emoji}')
+        line1 = '#填空 #英语 #雅思 #每日 #单词 #词汇书 #专八 #专四 #托福'
         titleEmoji = self.config.title
         content = f"{line1} \n {titleEmoji * 16}\n {prose}"
         self.set_values(self.config.xpath_pic_content_input, content)

@@ -34,12 +34,8 @@ class Environment(metaclass=SingletonMeta):
         self._engine = create_engine(self._config.db_file_name, echo=True)
         Base.metadata.create_all(self.engine)
         self._session = Session(bind=self._engine)
-
         ##loging
         self._logger = logger
-        if app == 0:
-            self._driver = webdriver.Firefox(options=self._config.driver_options)
-        # self._driver.minimize_window()
 
     @property
     def engine(self):
@@ -56,10 +52,6 @@ class Environment(metaclass=SingletonMeta):
     @property
     def config(self):
         return self._config
-
-    @property
-    def driver(self):
-        return self._driver
 
     def yt_options(self, path):
         return {

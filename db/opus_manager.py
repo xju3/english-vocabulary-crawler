@@ -30,7 +30,7 @@ class OpusManager:
             if item is not None:
                 continue
             hits += 1
-            opus = Opus(code=code, downloaded=0, published=0, author_id=1, account_id=1, page_index=page_index)
+            opus = Opus(code=code, downloaded=0, published=0, extracted=0, err=0, author_id=1, account_id=1, page_index=page_index)
             self.env.session.add(opus)
         if hits > 0:
             self.env.session.commit()
@@ -38,7 +38,7 @@ class OpusManager:
     def get_items_for_downloading(self, count):
         if count <= 0:
             return []
-        return self.env.session.query(Opus).filter_by(downloaded=0).limit(count).all()
+        return self.env.session.query(Opus).filter_by(downloaded=0, err=0).limit(count).all()
 
     def get_items_for_publishing(self, count):
         if count <= 0:

@@ -1,4 +1,5 @@
 import os.path
+import sys
 
 import yt_dlp
 
@@ -10,32 +11,30 @@ from db.opus_manager import OpusManager, OpusStatus
 from publisher.xhs.cmd import list_dir_files
 
 
-from common.logger import logger
-
-
-def dl_insta_video(env, code, path):
+def dl_insta_video(env,  code, path):
     options = yt_options(f'{path}')
     with yt_dlp.YoutubeDL(options) as ydl:
         url = env.config.insta_opus_url(code)
         return ydl.download([url])
 
 
-def extract_info(env, code):
+def extract_info(env, opus):
 
     ans = None, None
-    path = f'{env.config.opus_dir}/{code}'
+    path = f'{env.config.opus_dir}/{opus.id}.{opus.code}'
     if not os.path.isdir(path):
         return ans
 
     video_files = list_dir_files(path, 'mp4')
     if len(video_files) == 0:
+        env.logger.error("no video files found")
         return ans
 
     image_files = []
     for file in video_files:
-        input_file = f'{env.config.opus_dir}/{code}/{file}'
+        input_file = f'{path}/{file}'
         output_file = input_file.replace("mp4", "jpg")
-        logger.debug(f"\n{input_file}\n{output_file}")
+        env.logger.debug(f"\n{input_file}\n{output_file}")
         image_files.append(output_file)
         extract_single_frame(input_file, output_file)
 
@@ -46,10 +45,10 @@ def extract_info(env, code):
     for image in image_files:
         ans = extract_largest_font_words(image)
         if len(ans) == 0:
-            logger.error(f"no words found: {image}")
+            env.logger.error(f"no words found: {image}")
             continue
         word = " ".join(ans)
-        logger.debug(word)
+        env.logger.debug(word)
         words.append(word)
 
     prose = None
@@ -64,9 +63,11 @@ class SaiLingoVocDownloader:
     def __init__(self):
         self.env = Environment(app=1)
         self.opus_manager = OpusManager()
+        self.config = self.env.config
+        self.logger = self.env.logger
 
     def run(self):
-        failures = self.download(10)
+        failures = self.download(5)
         while failures != 0:
             failures = self.download(failures)
 
@@ -76,21 +77,21 @@ class SaiLingoVocDownloader:
         for opus in items:
             self.opus_manager.set_opus_status(opus.code, OpusStatus.downloaded)
             code = opus.code
-            path = f'{self.env.config.opus_dir}/{code}'
+            path = f'{self.config.opus_dir}/{opus.id}.{code}'
             try:
                 dl_insta_video(self.env, code, path=path)
-                path = f'{self.env.config.opus_dir}/{opus.code}'
                 if os.path.isdir(path) and len(list_dir_files(path, 'mp4')) > 0:
                     self.opus_manager.set_opus_status(opus.code, OpusStatus.downloaded)
-                    words, prose = extract_info(self.env, opus.code)
+                    words, prose = extract_info(self.env, opus)
                     if words is None or prose is None:
                         self.opus_manager.set_opus_status(opus.code, OpusStatus.no_contents)
-                        continue
+                        self.logger.error("no words and prose.")
+                        sys.exit(0)
                     self.opus_manager.update_extracted_info(opus.code, words, prose)
                 else:
                     self.opus_manager.set_opus_status(opus.code, OpusStatus.no_resource)
                     failures += 1
             except Exception as e:
-                self.env.logger.error(e)
+                self.logger.error(e)
         return failures
 

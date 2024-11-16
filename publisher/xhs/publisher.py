@@ -4,6 +4,8 @@ import sys
 import time
 import shutil
 
+from selenium import webdriver
+
 from common.env import Environment
 from db.opus_manager import OpusManager, OpusStatus
 from publisher.xhs.cmd import list_dir_files
@@ -17,11 +19,11 @@ class Publisher(object):
         self.env = Environment()
         self.config = self.env.config
         self.logger = self.env.logger
-        self.driver = self.env.driver
+        self.driver = webdriver.Firefox(options=self.config.driver_options)
         self.has_cookie = False
         self.user_list = []
         self.cookie_dict = {}
-        self.web_interaction = WebInteraction(self.env)
+        self.web_interaction = WebInteraction(self.env, self.driver)
         self.curr_user = ''
         self.load_cookie_users()
         self.opus_manager = OpusManager()
@@ -100,11 +102,11 @@ class Publisher(object):
         if len(items) == 0:
             self.logger.error("no data to publish")
             sys.exit(0)
-        self.logger.debug(f"{list(map(lambda d: d.code, items)) }")
         self.web_interaction.start_publishing()
         for item in items:
+            self.logger.debug(f"{item.id} -> {item.code}")
             try:
-                path = f'{self.config.opus_dir}/{item.code}'
+                path = f'{self.config.opus_dir}/{item.id}.{item.code}'
                 if not os.path.exists(path):
                     self.logger.error("directory not exist!")
                     self.opus_manager.set_opus_status(item.code, OpusStatus.no_pics)
@@ -118,7 +120,8 @@ class Publisher(object):
                 self.web_interaction.publish_pictures(item, pics)
                 time.sleep(self.config.sleep_medium_time)
                 self.opus_manager.set_opus_status(item.code, OpusStatus.published)
-                shutil.rmtree(f'{self.config.opus_dir}/{item.code}')
+                shutil.rmtree(f'{self.config.opus_dir}/{item.id}.{item.code}')
+                #self.logger(f"{item.id}.{item.code} published")
             except Exception as e:
                 self.logger.error(e)
         self.driver.quit()
