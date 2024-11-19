@@ -3,7 +3,6 @@ import os
 import sys
 import time
 import shutil
-
 from selenium import webdriver
 
 from common.env import Environment
@@ -19,14 +18,14 @@ class Publisher(object):
         self.env = Environment()
         self.config = self.env.config
         self.logger = self.env.logger
-        self.driver = webdriver.Firefox(options=self.config.driver_options)
         self.has_cookie = False
         self.user_list = []
         self.cookie_dict = {}
-        self.web_interaction = WebInteraction(self.env, self.driver)
         self.curr_user = ''
-        self.load_cookie_users()
+        self.driver = webdriver.Firefox(options=self.config.driver_options)
+        self.web_interaction = WebInteraction(self.config, self.driver, self.env.logger)
         self.opus_manager = OpusManager()
+        self.load_cookie_users()
 
     def load_cookie_users(self):
         cookie_file = f'{self.config.cookie_file_name}'
@@ -46,7 +45,7 @@ class Publisher(object):
 
     def login_by_cookie(self):
         cookie = self.cookie_dict[self.config.xhs_phone]
-        max_expiry_time= 0
+        max_expiry_time= 0;
         for cookie in json.loads(cookie):
             self.driver.add_cookie(cookie)
             expiry = cookie['expiry']
@@ -61,6 +60,7 @@ class Publisher(object):
 
     def login_by_phone(self):
         self.web_interaction.send_sms_code(self.config.xhs_phone)
+        sms_code_valid = False
         while True:
             code = input("please enter sms code here：")
             if len(code) == 6:
@@ -76,7 +76,7 @@ class Publisher(object):
 
     def run(self):
         # open browser
-        self.web_interaction.open(self.config.xhs_login_url, self.config.xpath_login_button)
+        self.web_interaction.open(self.config.xhs_login_url,   self.config.xpath_login_button)
         # if there are cookies at local, login by cookie*
         if self.has_cookie:
             self.login_by_cookie()
@@ -104,9 +104,9 @@ class Publisher(object):
             sys.exit(0)
         self.web_interaction.start_publishing()
         for item in items:
-            self.logger.debug(f"{item.id} -> {item.code}")
+            self.logger.debug(f"{item.id}:{item.code}")
             try:
-                path = f'{self.config.opus_dir}/{item.id}.{item.code}'
+                path = f'{self.config.opus_dir}/{item.code}'
                 if not os.path.exists(path):
                     self.logger.error("directory not exist!")
                     self.opus_manager.set_opus_status(item.code, OpusStatus.no_pics)
@@ -118,10 +118,9 @@ class Publisher(object):
                     self.logger.error("no pics!")
                     continue
                 self.web_interaction.publish_pictures(item, pics)
-                time.sleep(self.config.sleep_medium_time)
+                time.sleep(self.config.sleep_short_time)
                 self.opus_manager.set_opus_status(item.code, OpusStatus.published)
-                shutil.rmtree(f'{self.config.opus_dir}/{item.id}.{item.code}')
-                #self.logger(f"{item.id}.{item.code} published")
+                shutil.rmtree(f'{self.config.opus_dir}/{item.code}')
             except Exception as e:
                 self.logger.error(e)
         self.driver.quit()

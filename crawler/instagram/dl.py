@@ -67,7 +67,7 @@ class SaiLingoVocDownloader:
         self.logger = self.env.logger
 
     def run(self):
-        failures = self.download(5)
+        failures = self.download(3)
         while failures != 0:
             failures = self.download(failures)
 

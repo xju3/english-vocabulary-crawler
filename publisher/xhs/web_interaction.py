@@ -9,10 +9,10 @@ from selenium.webdriver.support.wait import WebDriverWait
 
 class WebInteraction:
 
-    def __init__(self, env, driver):
-        self.config = env.config
+    def __init__(self, config, driver, logger):
+        self.config = config
         self.driver = driver
-        self.logger = env.logger
+        self.logger = logger
 
     def send_sms_code(self, phone):
         self.set_values(self.config.xpath_phone_input, phone)
@@ -69,21 +69,26 @@ class WebInteraction:
         prose = item.prose
         size = 0
         total = 0
+        subject = prose
         for word in words:
             total += 1
-            prose = prose.replace(word, f'_____({total})_____')
+            subject = subject.replace(word, f'__({total})__')
+            prose = prose.replace(word, f'({total}){word.upper()}')
             if len(word) > size:
                 title = word
                 size = len(word)
 
+        line1 = '#英语 #雅思 #每日 #单词 #词汇书 #专八 #专四 #托福'
         emoji = self.config.title
-        if len(prose) > 200:
-            self.set_values(self.config.xpath_pic_title_input, f'{item.id}.填空->{emoji}{title.upper()}{emoji}')
-        else:
-            self.set_values(self.config.xpath_pic_title_input, f'{item.id}.{emoji}{title.upper()}{emoji}')
-        line1 = '#填空 #英语 #雅思 #每日 #单词 #词汇书 #专八 #专四 #托福'
         titleEmoji = self.config.title
-        content = f"{line1} \n {titleEmoji * 16}\n {prose}"
+        self.set_values(self.config.xpath_pic_title_input, f'{item.id}.{emoji}{title.upper()}{emoji}')
+        if len(prose) > 200:
+            line1 = '#填空 #英语 #雅思 #每日 #单词 #词汇书 #专八 #专四 #托福'
+            content = f"{line1} \n {item.words} \n 题目:{titleEmoji * 8}\n {subject}"
+            if len(prose) + len(content) < 900:
+                content = f'{content} \n\n\n\n\n 答案:{emoji * 10} \n {prose}'
+        else:
+            content = f"{line1} \n 短文:{titleEmoji * 8}\n {prose}"
         self.set_values(self.config.xpath_pic_content_input, content)
         self.click(self.config.xpath_pic_publish_button)
 

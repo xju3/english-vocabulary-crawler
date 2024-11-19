@@ -16,7 +16,7 @@ def ollama_compose_prose(words, repeat=5):
     }
     # Define the prompt or input for the model
     data = {
-        "model": os.getenv("OLLAMA_MODEL_LLAMA"),
+        "model": 'llama3.2:latest', 
         "prompt": prompt,
         "format": "json",
         "stream": False
