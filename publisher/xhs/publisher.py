@@ -106,7 +106,7 @@ class Publisher(object):
         for item in items:
             self.logger.debug(f"{item.id}:{item.code}")
             try:
-                path = f'{self.config.opus_dir}/{item.code}'
+                path = f'{self.config.opus_dir}/{item.id}.{item.code}'
                 if not os.path.exists(path):
                     self.logger.error("directory not exist!")
                     self.opus_manager.set_opus_status(item.code, OpusStatus.no_pics)
@@ -120,7 +120,7 @@ class Publisher(object):
                 self.web_interaction.publish_pictures(item, pics)
                 time.sleep(self.config.sleep_short_time)
                 self.opus_manager.set_opus_status(item.code, OpusStatus.published)
-                shutil.rmtree(f'{self.config.opus_dir}/{item.code}')
+                shutil.rmtree(path)
             except Exception as e:
                 self.logger.error(e)
         self.driver.quit()
