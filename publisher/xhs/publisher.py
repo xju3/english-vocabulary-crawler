@@ -117,7 +117,8 @@ class Publisher(object):
                     self.opus_manager.set_opus_status(item.code, OpusStatus.no_pics)
                     self.logger.error("no pics!")
                     continue
-                self.web_interaction.publish_pictures(item, pics)
+                # self.web_interaction.publish_pictures(item, pics)
+                self.web_interaction.publish_video(item)
                 time.sleep(self.config.sleep_short_time)
                 self.opus_manager.set_opus_status(item.code, OpusStatus.published)
                 shutil.rmtree(path)

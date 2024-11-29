@@ -9,6 +9,7 @@ from common.logger import logger
 # Path to the Tesseract executable (modify this path if necessary)
 pytesseract.pytesseract.tesseract_cmd = '/opt/homebrew/bin/tesseract'
 
+
 def mp4_to_mov(video_file, output_video_name):
     command = [
         "ffmpeg",

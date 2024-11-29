@@ -9,6 +9,7 @@ from common.config import yt_options
 from common.env import Environment
 from db.opus_manager import OpusManager, OpusStatus
 from publisher.xhs.cmd import list_dir_files
+import subprocess
 
 
 def dl_insta_video(env,  code, path):
@@ -16,6 +17,33 @@ def dl_insta_video(env,  code, path):
     with yt_dlp.YoutubeDL(options) as ydl:
         url = env.config.insta_opus_url(code)
         return ydl.download([url])
+
+# merge multiple videos to one
+def merge_video_files(logger, path, idx):
+    files = list_dir_files(path, ext=".mp4")
+    if len(files) == 0:
+        logger.error("no video files found")
+        return
+    
+    # cmd = ['ffmpeg']
+    # for line in files:
+    #     file_name = f"{path}/{line}"
+    #     cmd.append('-i')
+    #     cmd.append(file_name)
+    # cmd.append('-filter_complex')
+    # cmd.append(f"concat=n={len(files)}:v=1:a=1")
+    # cmd.append("-vn")
+    # cmd.append('-y')
+    # cmd.append(f"{idx}.mp4")
+    # logger.debug(cmd)
+
+    cmd = 'ffmpeg '
+    for file in files:
+        file_name = f'{path}/{file}'
+        cmd += f' -i \'{file_name}\''
+    cmd += f' -filter_complex concat=n={len(files)}:v=1:a=1 -vn -y {path}/{idx}.mp4'
+    logger.debug(cmd)
+    subprocess.call(cmd, shell=True)
 
 
 def extract_info(env, opus):
@@ -32,6 +60,8 @@ def extract_info(env, opus):
 
     image_files = []
     for file in video_files:
+        if (file == f'{opus.id}.mp4'):
+            continue
         input_file = f'{path}/{file}'
         output_file = input_file.replace("mp4", "jpg")
         env.logger.debug(f"\n{input_file}\n{output_file}")
@@ -67,7 +97,7 @@ class SaiLingoVocDownloader:
         self.logger = self.env.logger
 
     def run(self):
-        failures = self.download(3)
+        failures = self.download(5)
         while failures != 0:
             failures = self.download(failures)
 
@@ -80,6 +110,7 @@ class SaiLingoVocDownloader:
             path = f'{self.config.opus_dir}/{opus.id}.{code}'
             try:
                 dl_insta_video(self.env, code, path=path)
+                merge_video_files(self.logger, path=path, idx=opus.id)
                 if os.path.isdir(path) and len(list_dir_files(path, 'mp4')) > 0:
                     self.opus_manager.set_opus_status(opus.code, OpusStatus.downloaded)
                     words, prose = extract_info(self.env, opus)

@@ -7,8 +7,8 @@ from common.logger import logger
 
 
 def ollama_compose_prose(words, repeat=5):
-    ollama_url = f"{os.getenv("OLLAMA_HOST")}/api/generate"
-    prompt = f"Generate a easy prose with fewer than 800 characters, incorporating these words: {",".join(words)}."
+    ollama_url = f"{os.getenv('OLLAMA_HOST')}/api/generate"
+    prompt = f"Generate a easy prose with fewer than 800 characters, incorporating these words: { ','.join(words)}."
     logger.debug(prompt)
     headers = {
         "Authorization": f"Bearer {os.getenv('OLLAMA_KEY')}",  # Add the token here
@@ -16,7 +16,7 @@ def ollama_compose_prose(words, repeat=5):
     }
     # Define the prompt or input for the model
     data = {
-        "model": 'llama3.2:latest', 
+        "model": os.getenv("OLLAMA_MODEL"), 
         "prompt": prompt,
         "format": "json",
         "stream": False

@@ -21,7 +21,7 @@ def get_project_dir():
 
 def yt_options(path):
     return {
-        'outtmpl': f'{path}/%(title)s.%(ext)s',
+        'outtmpl': f'{path}/%(video_autonumber)s.%(ext)s',
         'format': 'bestvideo+bestaudio/best',
         'merge_output_format': 'mp4'
     }
@@ -64,6 +64,7 @@ class CrawlerConfig(object):
         self._xpath_login_button = cp.get('xpath', 'login_button')
         self._xpath_start_publishing = cp.get('xpath', 'start_publishing')
         self._xpath_tab_pics = cp.get('xpath', 'tab_pics')
+        self._xpath_tab_video = cp.get('xpath','tab_video')
         self._xpath_upload_video_button  = cp.get('xpath', 'upload_video_button')
         self._xpath_upload_pic_button = cp.get('xpath', 'upload_pic_button')
         self._xpath_video_publish_button = cp.get('xpath', 'video_publish_button')
@@ -105,6 +106,10 @@ class CrawlerConfig(object):
     @property
     def xpath_tab_pics(self):
         return self._xpath_tab_pics
+    
+    @property
+    def xpath_tab_video(self):
+        return self._xpath_tab_video
 
     @property
     def xpath_upload_video_button(self):

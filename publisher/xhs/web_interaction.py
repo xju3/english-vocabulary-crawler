@@ -45,25 +45,30 @@ class WebInteraction:
 
     def start_publishing(self):
         self.click(self.config.xpath_start_publishing, self.config.sleep_medium_time)
-        self.switch_to_publishing_picture()
+        self.switch_to_picture_tab()
 
-    def switch_to_publishing_picture(self):
+    def switch_to_picture_tab(self):
         self.click(self.config.xpath_tab_pics, self.config.sleep_medium_time)
 
-    def publish_video(self, video_local_path):
-        self.set_values(self.config.xpath_video_input, video_local_path)
-        time.sleep(self.config.sleep_long_time)
+    def switch_to_video_tab(self):
+        self.click(self.config.xpath_tab_video, self.config.sleep_medium_time)
+
+    def publish_video(self, opus):
+        self.switch_to_video_tab()
+        file_name = f'{self.config.opus_dir}/{opus.id}.{opus.code}/{opus.id}.mp4'
+        self.set_values(self.config.xpath_upload_video_button, file_name)
+        self.set_title_comments(item=opus)
         self.click(self.config.xpath_video_publish_button)
 
-    def publish_pictures(self, item, pics):
-        self.switch_to_publishing_picture()
+    def upload_pics(self, item, pics):
+        self.switch_to_picture_tab()
         full_path_pics = []
         for p in pics:
             file_name = f'{self.config.opus_dir}/{item.id}.{item.code}/{p}'
             full_path_pics.append(file_name)
-
         self.set_values(self.config.xpath_upload_video_button, "\n".join(full_path_pics))
 
+    def set_title_comments(self, item):
         words = item.words.split(",")
         title = datetime.now().strftime("%Y-%m-%d")
         prose = item.prose
@@ -85,11 +90,13 @@ class WebInteraction:
         if len(prose) > 200:
             line1 = '#填空 #英语 #雅思 #每日 #单词 #词汇书 #专八 #专四 #托福'
             content = f"{line1} \n {item.words} \n 题目:{titleEmoji * 8}\n {subject}"
-            if len(prose) + len(content) < 900:
-                content = f'{content} \n\n\n\n\n 答案:{emoji * 10} \n {prose}'
         else:
             content = f"{line1} \n 短文:{titleEmoji * 8}\n {prose}"
         self.set_values(self.config.xpath_pic_content_input, content)
+
+    def publish_pictures(self, item, pics):
+        self.upload_pics(item, pics=pics)
+        self.set_title_comments(item=item)
         self.click(self.config.xpath_pic_publish_button)
 
     # default timeout time is 3s
