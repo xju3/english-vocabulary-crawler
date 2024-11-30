@@ -29,7 +29,6 @@ def yt_options(path):
 
 
 class CrawlerConfig(object):
-
     _emojis = []
     def __init__(self):
         config_file = f'{get_project_dir()}/common/config.ini'

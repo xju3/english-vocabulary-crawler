@@ -2,6 +2,8 @@ import sys
 from crawler.instagram.sai_lingo_voc import SaiLingoVoc
 from crawler.instagram.dl import SaiLingoVocDownloader
 from publisher.xhs.publisher import Publisher
+from dotenv import load_dotenv
+import os
 
 
 def main():
@@ -27,4 +29,5 @@ def main():
 
 
 if __name__ == '__main__':
+    load_dotenv()
     main()

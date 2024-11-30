@@ -17,6 +17,7 @@ class Publisher(object):
     def __init__(self):
         self.env = Environment()
         self.config = self.env.config
+        print(self.config.xhs_phone)
         self.logger = self.env.logger
         self.has_cookie = False
         self.user_list = []

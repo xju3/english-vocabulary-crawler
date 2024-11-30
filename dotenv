@@ -1,0 +1,5 @@
+XHS_PHONE=you phone number
+INSTAGAMM_USERNAME=account
+INSTAGRAM_PASSWORD=password
+LLM_HOST=llm_api_host_addr
+LLM_MODEL=model_name
