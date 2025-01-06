@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 from common.config import CrawlerConfig
 from common.logger import logger
 from db.model import Base
+from dotenv import load_dotenv
 
 
 class SingletonMeta(type):
@@ -30,6 +31,7 @@ class SingletonMeta(type):
 class Environment(metaclass=SingletonMeta):
 
     def __init__(self, app=0, *args, **kwargs):
+        load_dotenv('../.env')
         self._config = CrawlerConfig()
         self._engine = create_engine(self._config.db_file_name, echo=True)
         Base.metadata.create_all(self.engine)

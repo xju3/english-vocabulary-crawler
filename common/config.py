@@ -6,7 +6,7 @@ from pathlib import Path
 
 from fake_useragent import UserAgent
 from selenium.webdriver.firefox.options import Options
-
+from dotenv import load_dotenv
 
 def get_project_dir():
     current_dir = Path(__file__).resolve().parent
@@ -31,6 +31,7 @@ def yt_options(path):
 class CrawlerConfig(object):
     _emojis = []
     def __init__(self):
+        load_dotenv()
         config_file = f'{get_project_dir()}/common/config.ini'
         if not os.path.isfile(config_file):
             print(f'config file not found: {config_file}')
@@ -194,12 +195,12 @@ class CrawlerConfig(object):
     @property
     def driver_options(self):
         options = Options()
+        # 无界面模式
+        options.add_argument('--headless')
         options.add_argument("--disable-blink-features=AutomationControlled")
         options.add_argument('--disable-gpu')
         options.add_argument('--disable-dev-shm-usage')
         options.add_argument('--no-sandbox')
         options.add_argument(f'user-agent=={UserAgent().random}')
-        # 无界面模式
-        # options.add_argument('--headless')
         return options
 

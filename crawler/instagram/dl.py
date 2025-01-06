@@ -19,29 +19,26 @@ def dl_insta_video(env,  code, path):
         return ydl.download([url])
 
 # merge multiple videos to one
-def merge_video_files(logger, path, idx):
+def merge_video_files(logger, path, opus_id):
     files = list_dir_files(path, ext=".mp4")
     if len(files) == 0:
         logger.error("no video files found")
         return
-    
-    # cmd = ['ffmpeg']
-    # for line in files:
-    #     file_name = f"{path}/{line}"
-    #     cmd.append('-i')
-    #     cmd.append(file_name)
-    # cmd.append('-filter_complex')
-    # cmd.append(f"concat=n={len(files)}:v=1:a=1")
-    # cmd.append("-vn")
-    # cmd.append('-y')
-    # cmd.append(f"{idx}.mp4")
-    # logger.debug(cmd)
-
     cmd = 'ffmpeg '
     for file in files:
         file_name = f'{path}/{file}'
         cmd += f' -i \'{file_name}\''
-    cmd += f' -filter_complex concat=n={len(files)}:v=1:a=1 -vn -y {path}/{idx}.mp4'
+    cmd += " -filter_complex \""
+    movie_idx = 0
+    while movie_idx < len(files):
+        cmd += f" [{movie_idx}:v]scale=640:640:force_original_aspect_ratio=decrease:eval=frame,pad=640:640:-1:-1:color=black[v{movie_idx}];"
+        movie_idx += 1
+    file_idx = 0
+    while file_idx < len(files):
+        cmd += f' [v{file_idx}][{file_idx}:a] '
+        file_idx += 1
+    cmd += f' concat=n={len(files)}:v=1:a=1[v][a]\"'
+    cmd += f' -map [v]  -map [a] -vcodec libx264 {path}/{opus_id}.mp4'
     logger.debug(cmd)
     subprocess.call(cmd, shell=True)
 
@@ -97,7 +94,7 @@ class SaiLingoVocDownloader:
         self.logger = self.env.logger
 
     def run(self):
-        failures = self.download(5)
+        failures = self.download(1)
         while failures != 0:
             failures = self.download(failures)
 
@@ -110,7 +107,7 @@ class SaiLingoVocDownloader:
             path = f'{self.config.opus_dir}/{opus.id}.{code}'
             try:
                 dl_insta_video(self.env, code, path=path)
-                merge_video_files(self.logger, path=path, idx=opus.id)
+                merge_video_files(self.logger, path=path, opus_id=opus.id)
                 if os.path.isdir(path) and len(list_dir_files(path, 'mp4')) > 0:
                     self.opus_manager.set_opus_status(opus.code, OpusStatus.downloaded)
                     words, prose = extract_info(self.env, opus)

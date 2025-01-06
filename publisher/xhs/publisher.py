@@ -9,7 +9,7 @@ from common.env import Environment
 from db.opus_manager import OpusManager, OpusStatus
 from publisher.xhs.cmd import list_dir_files
 from publisher.xhs.web_interaction import WebInteraction
-
+from dotenv import load_dotenv
 
 
 class Publisher(object):
@@ -45,6 +45,7 @@ class Publisher(object):
         self.logger.debug("user count: " + str(len(self.user_list)))
 
     def login_by_cookie(self):
+        print(self.config)
         cookie = self.cookie_dict[self.config.xhs_phone]
         max_expiry_time= 0;
         for cookie in json.loads(cookie):

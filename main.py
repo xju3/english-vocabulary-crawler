@@ -3,7 +3,6 @@ from crawler.instagram.sai_lingo_voc import SaiLingoVoc
 from crawler.instagram.dl import SaiLingoVocDownloader
 from publisher.xhs.publisher import Publisher
 from dotenv import load_dotenv
-import os
 
 
 def main():
@@ -19,15 +18,12 @@ def main():
     if parameters[0] == "2":
         dl = SaiLingoVocDownloader()
         dl.run()
-        return
 
     # publish the downloaded contents.
     if parameters[0] == "3":
         xhs = Publisher()
-        xhs.run()
-
-
+        xhs.run()    
 
 if __name__ == '__main__':
-    load_dotenv()
+    load_dotenv('.env')
     main()
