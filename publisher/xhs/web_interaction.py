@@ -1,5 +1,6 @@
 import sys
 import time
+import os
 from datetime import datetime
 
 from selenium.webdriver.common.by import By
@@ -56,6 +57,10 @@ class WebInteraction:
     def publish_video(self, opus):
         self.switch_to_video_tab()
         file_name = f'{self.config.opus_dir}/{opus.id}.{opus.code}/{opus.id}.mp4'
+        self.logger.debug(f'video file: {file_name}')
+        if not os.path.exists(file_name):
+            self.logger.error(f'Video file not found: {file_name}')
+            raise Exception(f'Video file not found: {file_name}')
         self.set_values(self.config.xpath_upload_video_button, file_name)
         self.set_title_comments(item=opus)
         self.click(self.config.xpath_video_publish_button)

@@ -123,7 +123,7 @@ class Publisher(object):
                 self.web_interaction.publish_video(item)
                 time.sleep(self.config.sleep_short_time)
                 self.opus_manager.set_opus_status(item.code, OpusStatus.published)
-                shutil.rmtree(path)
+                # shutil.rmtree(path)
             except Exception as e:
                 self.logger.error(e)
         self.driver.quit()

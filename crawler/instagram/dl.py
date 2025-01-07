@@ -38,7 +38,7 @@ def merge_video_files(logger, path, opus_id):
         cmd += f' [v{file_idx}][{file_idx}:a] '
         file_idx += 1
     cmd += f' concat=n={len(files)}:v=1:a=1[v][a]\"'
-    cmd += f' -map [v]  -map [a] -vcodec libx264 {path}/{opus_id}.mp4'
+    cmd += f' -map [v]  -map [a] -vcodec libx264 -y {path}/{opus_id}.mp4'
     logger.debug(cmd)
     subprocess.call(cmd, shell=True)
 
@@ -94,7 +94,7 @@ class SaiLingoVocDownloader:
         self.logger = self.env.logger
 
     def run(self):
-        failures = self.download(1)
+        failures = self.download(8)
         while failures != 0:
             failures = self.download(failures)
 
